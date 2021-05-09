@@ -8,11 +8,10 @@ import GameBoard from "./components/game/GameBoard";
 import { GameState } from "./models/GameModel";
 
 function App() {
-  const [mainElement, setMainElement] = useState(
-    <Loading text="Connecting to server, please wait" />
-  );
   const[gameState, setGameState] = useState(GameState.CONNECTING);
   const[selectedPiece, setSelectedPiece] = useState(null);
+  const [highlightedFields, setHighlightedFields] = useState([]);
+
   const URL = "ws://localhost:8888/ws";
   const PROTOCOL_NAME = "checkers_game";
   const socket = useRef(null);
@@ -28,24 +27,30 @@ function App() {
     }
   }, []);
 
-  // On game state change
-  useEffect(() => {
+  const piecePickUpDropCallback = (piece, pickedUpOrDropped) => {
+    // pickedUpOrDropped: true menas picked up, false dropped down
+    // TODO: Highlight possible moves
+    if (pickedUpOrDropped) {
+      setSelectedPiece(piece);
+      setHighlightedFields([piece.fieldNo]);
+    } else {
+      setSelectedPiece(null);
+      setHighlightedFields([]);
+    }
+  }
+
+const getMainElement = () => {
     switch(gameState) {
       case GameState.CONNECTING:
-          setMainElement(<Loading text="Connecting to server, please wait" />);
-          break;
+          return<Loading text="Connecting to server, please wait" />;
       case GameState.CONNECTED:
-          setMainElement(<Loading text="Joining a game room, please wait" />);
-          break;
+          return <Loading text="Joining a game room, please wait" />;
       case GameState.LOOKING_FOR_OPPONENT:
-          setMainElement(<Loading text="Looking for an opponent, please wait" />);
-          break;
-      case GameState.GAME_START:
-          setMainElement(<GameBoard />)
-          break;
+          return <Loading text="Looking for an opponent, please wait" />;
+      default:
+          return <GameBoard piecePickUpDropCallback={piecePickUpDropCallback} pieces={[]} highlightedFields={highlightedFields}/>;
     }
-    
-  }, [gameState]);
+}
 
   // Receiving messages
   useEffect(() => {
@@ -57,7 +62,7 @@ function App() {
   return (
     <div>
       <Header />
-      <Container>{mainElement}</Container>
+      <Container>{getMainElement()}</Container>
     </div>
   );
 }

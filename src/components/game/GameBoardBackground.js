@@ -42,6 +42,7 @@ const GameBoardBackground = (props) => {
   const highlightFields = (ctx) => {
     ctx.save();
     ctx.fillStyle = "#FF0";
+    console.log('Fields to highlight', props.highlightedFields)
     props.highlightedFields.forEach((fieldNo) => {
       let x = ((totalFields - fieldNo) % fieldsInRow) * fieldSize;
       let y = Math.floor((totalFields - fieldNo) / fieldsInRow) * fieldSize;

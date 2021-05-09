@@ -10,7 +10,7 @@ import { GamePieceType } from "../../models/GamePieceModel";
 
 const GamePiece = (props) => {
   var image;
-  switch(props.piece.type) {
+  switch (props.piece.type) {
     case GamePieceType.LIGHT_MAN:
       image = lightManImg;
       break;
@@ -26,6 +26,10 @@ const GamePiece = (props) => {
   }
   const [usedImage] = useImage(image);
 
+  const onDragStartCallback = (e) => {
+    props.piecePickUpDropCallback(props.piece, true);
+  };
+
   const onDragEndCallback = (e) => {
     const canvas = e.target.parent.canvas._canvas;
     const canvasLeft = canvas.offsetLeft + canvas.clientLeft;
@@ -34,11 +38,26 @@ const GamePiece = (props) => {
     const y = e.target.y() - canvasTop;
     const fieldsInRow = 8;
     const fieldSize = 1000 / fieldsInRow; // TODO: Don't use hardcoded values
-    var newFieldNo = fieldsInRow*fieldsInRow - Math.floor(x / fieldSize) - fieldsInRow * Math.floor(y / fieldSize);
-    console.log('Dragged', props.piece.fieldNo, newFieldNo);
-  }
+    var newFieldNo =
+      fieldsInRow * fieldsInRow -
+      Math.floor(x / fieldSize) -
+      fieldsInRow * Math.floor(y / fieldSize);
+    console.log("Dragged", props.piece.fieldNo, newFieldNo);
+    props.piecePickUpDropCallback(props.piece, false);
+  };
 
-  return <Image image={usedImage} x={props.piece.x} y={props.piece.y} draggable onDragEnd={e=>{onDragEndCallback(e)}}/>;
+  return (
+    <Image
+      image={usedImage}
+      x={props.piece.x}
+      y={props.piece.y}
+      draggable
+      onDragStart={(e) => onDragStartCallback(e)}
+      onDragEnd={(e) => {
+        onDragEndCallback(e);
+      }}
+    />
+  );
 };
 
 export default GamePiece;

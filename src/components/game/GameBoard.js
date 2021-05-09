@@ -18,7 +18,7 @@ const GameBoard = (props) => {
       >
         <GameBoardBackground highlightedFields={props.highlightedFields}/>
         <Layer>
-            <GamePiece piece={new GamePieceModel(2, 10)} />
+            <GamePiece piece={new GamePieceModel(2, 10)} piecePickUpDropCallback={props.piecePickUpDropCallback} />
           {
             props.pieces.map((piece)=> {
               return <GamePiece key={piece.fieldNo} piece={piece} />
