@@ -6,11 +6,23 @@ import Loading from "./components/Loading";
 import Header from "./components/Header";
 import GameBoard from "./components/game/GameBoard";
 import { GameState } from "./models/GameModel";
+import GamePieceModel from "./models/GamePieceModel";
+
+const ConnectionState = {
+  CONNECTING: 0,
+  CONNECTED: 1,
+  LOOKING_FOR_OPPONENT: 2,
+  IN_GAME: 3
+}
+
 
 function App() {
-  const [gameState, setGameState] = useState(GameState.CONNECTING);
+  const [connectionState, setConnectionState] = useState(ConnectionState.CONNECTING);
+  const [gameState, setGameState] = useState(GameState.NOT_STARTED);
   const [selectedPiece, setSelectedPiece] = useState(null);
   const [highlightedFields, setHighlightedFields] = useState([]);
+  const [gamePieces, setGamePieces] = useState([]);
+  const [myColor, setMyColor] = useState(null);
 
   const URL = "ws://localhost:8888/ws";
   const PROTOCOL_NAME = "checkers_game";
@@ -20,27 +32,36 @@ function App() {
   useEffect(() => {
     socket.current = new WebSocket(URL, PROTOCOL_NAME);
     socket.current.onopen = (e) => {
-      setGameState(GameState.CONNECTED);
+      console.log("Socket open");
+      setConnectionState(ConnectionState.CONNECTED);
     };
     return () => {
+      console.log("Socket close");
       socket.current.close();
     };
   }, []);
 
-  // On state change
+  // On connection state change
   useEffect(() => {
     var playerUUID;
-    switch (gameState) {
-      case GameState.CONNECTED:
+    switch (connectionState) {
+      case ConnectionState.CONNECTED:
           playerUUID = localStorage.getItem("UUID");
           if (playerUUID === null) {
+            console.log("Sent:", "JoinNew");
             socket.current.send("JoinNew");
           } else {
+            console.log("Sent:", `JoinExisting;${playerUUID}`);
             socket.current.send(`JoinExisting;${playerUUID}`);
           }
         break;
     }
-    console.log("New game state:", gameState);
+    console.log("New connection state:", connectionState);
+  }, [connectionState]);
+
+  // On game state change
+  useEffect(() => {
+    
   }, [gameState]);
 
   const piecePickUpDropCallback = (piece, pickedUpOrDropped) => {
@@ -56,18 +77,18 @@ function App() {
   };
 
   const getMainElement = () => {
-    switch (gameState) {
-      case GameState.CONNECTING:
+    switch (connectionState) {
+      case ConnectionState.CONNECTING:
         return <Loading text="Connecting to server, please wait" />;
-      case GameState.CONNECTED:
+      case ConnectionState.CONNECTED:
         return <Loading text="Joining a game room, please wait" />;
-      case GameState.LOOKING_FOR_OPPONENT:
+      case ConnectionState.LOOKING_FOR_OPPONENT:
         return <Loading text="Looking for an opponent, please wait" />;
-      default:
+      case ConnectionState.IN_GAME:
         return (
           <GameBoard
             piecePickUpDropCallback={piecePickUpDropCallback}
-            pieces={[]}
+            pieces={gamePieces}
             highlightedFields={highlightedFields}
           />
         );
@@ -81,15 +102,28 @@ function App() {
       const tmp = e.data.split(';');
       switch(tmp[0]) {
         case 'Welcome':
-            setGameState(GameState.LOOKING_FOR_OPPONENT);
+            setConnectionState(ConnectionState.LOOKING_FOR_OPPONENT);
             break;
         case 'WelcomeNew':
           localStorage.setItem('UUID', tmp[1]);
-          setGameState(GameState.LOOKING_FOR_OPPONENT);
+          setConnectionState(ConnectionState.LOOKING_FOR_OPPONENT);
           break;
         case 'StartGame':
-          setGameState(GameState.GAME_START);
+          setConnectionState(GameState.IN_GAME);
+          setGameState.apply(GameState.LIGHT_TURN);
+          setMyColor(parseInt(tmp[1]));
+          setGamePieces(JSON.parse(tmp[2]).map((piece) => {
+            return new GamePieceModel(piece.color, piece.type, piece.field_no)
+          }));
           break;
+        case "CurrentState":
+          setMyColor(parseInt(tmp[1]));
+          // TODO: Set connection state
+          setConnectionState(ConnectionState.IN_GAME);
+          setGameState(parseInt(tmp[2]));
+          setGamePieces(JSON.parse(tmp[3]).map((piece) => {
+            return new GamePieceModel(piece.color, piece.type, piece.field_no)
+          }));
         }
     };
   });
@@ -97,11 +131,12 @@ function App() {
   return (
     <div>
       <Header />
-      <GameBoard
+      // TODO: Add info about my color
+      {/* <GameBoard
             piecePickUpDropCallback={piecePickUpDropCallback}
             pieces={[]}
             highlightedFields={highlightedFields}
-          />
+          /> */}
       <Container>{getMainElement()}</Container>
     </div>
   );

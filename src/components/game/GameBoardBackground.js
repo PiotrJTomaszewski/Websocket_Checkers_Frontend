@@ -24,7 +24,7 @@ const GameBoardBackground = (props) => {
   const colorizeFields = (ctx) => {
     // Color usable fields
     ctx.fillStyle = "#0F0";
-    for (let i=1; i < totalUsableFields; i++) {
+    for (let i=1; i <= totalUsableFields; i++) {
       let xy = fieldNoToXY(i);
       ctx.fillRect(xy.x, xy.y, fieldSize, fieldSize);
     }
@@ -44,8 +44,6 @@ const GameBoardBackground = (props) => {
 
     // Put field numbers
     for (let i = 1; i <= totalUsableFields; i++) {
-      // var x = (i % fieldsInRow) * fieldSize + fieldSize / 2;
-      // var y = Math.floor(i / fieldsInRow) * fieldSize + fieldSize - 3;
       let xy = fieldNoToXY(i);
       let x = xy.x + fieldSize / 2;
       let y = xy.y + fieldSize - 3;

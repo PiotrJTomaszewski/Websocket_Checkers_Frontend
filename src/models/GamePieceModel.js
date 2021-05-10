@@ -1,12 +1,16 @@
+const GamePieceColor = {
+    LIGHT: 1,
+    DARK: 2
+}
+
 const GamePieceType = {
-    LIGHT_MAN: 1,
-    LIGHT_KING: 2,
-    DARK_MAN: 3,
-    DARK_KING: 4
+    MAN: 1,
+    KING: 2
 }
 
 class GamePieceModel {
-    constructor(type, fieldNo) {
+    constructor(color, type, fieldNo) {
+        this.color = color;
         this.type = type;
         this.setField(fieldNo);
     }
@@ -30,4 +34,4 @@ class GamePieceModel {
     }
 }
 
-export {GamePieceModel as default, GamePieceType};
+export {GamePieceModel as default, GamePieceColor, GamePieceType};

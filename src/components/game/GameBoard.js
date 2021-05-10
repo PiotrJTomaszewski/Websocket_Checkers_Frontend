@@ -18,16 +18,9 @@ const GameBoard = (props) => {
       >
         <GameBoardBackground highlightedFields={props.highlightedFields}/>
         <Layer>
-          <GamePiece piece={new GamePieceModel(1, 1)} piecePickUpDropCallback={props.piecePickUpDropCallback} />
-          <GamePiece piece={new GamePieceModel(2, 2)} piecePickUpDropCallback={props.piecePickUpDropCallback} />
-          <GamePiece piece={new GamePieceModel(3, 3)} piecePickUpDropCallback={props.piecePickUpDropCallback} />
-          <GamePiece piece={new GamePieceModel(3, 5)} piecePickUpDropCallback={props.piecePickUpDropCallback} />
-            <GamePiece piece={new GamePieceModel(3, 10)} piecePickUpDropCallback={props.piecePickUpDropCallback} />
-            <GamePiece piece={new GamePieceModel(3, 30)} piecePickUpDropCallback={props.piecePickUpDropCallback} />
-
           {
             props.pieces.map((piece)=> {
-              return <GamePiece key={piece.fieldNo} piece={piece} />
+              return <GamePiece key={piece.fieldNo} piece={piece} piecePickUpDropCallback={props.piecePickUpDropCallback}/>
             })
           }
         </Layer>

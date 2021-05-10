@@ -6,23 +6,22 @@ import lightManImg from "../../assets/light_man.png";
 import lightKingImg from "../../assets/light_king.png";
 import darkManImg from "../../assets/dark_man.png";
 import darkKingImg from "../../assets/dark_king.png";
-import { GamePieceType } from "../../models/GamePieceModel";
+import { GamePieceColor, GamePieceType } from "../../models/GamePieceModel";
 
 const GamePiece = (props) => {
   var image;
-  switch (props.piece.type) {
-    case GamePieceType.LIGHT_MAN:
+  if (props.piece.type === GamePieceType.MAN) {
+    if (props.piece.color === GamePieceColor.LIGHT) {
       image = lightManImg;
-      break;
-    case GamePieceType.LIGHT_KING:
-      image = lightKingImg;
-      break;
-    case GamePieceType.DARK_MAN:
+    } else {
       image = darkManImg;
-      break;
-    case GamePieceType.DARK_KING:
+    }
+  } else {
+    if (props.piece.color === GamePieceColor.LIGHT) {
+      image = lightKingImg;
+    } else {
       image = darkKingImg;
-      break;
+    }
   }
   const [usedImage] = useImage(image);
 
