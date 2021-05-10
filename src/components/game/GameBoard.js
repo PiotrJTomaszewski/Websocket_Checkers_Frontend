@@ -7,6 +7,11 @@ import GamePieceModel from "../../models/GamePieceModel";
 
 // TODO: Rotate the board
 const GameBoard = (props) => {
+  const layerRef = React.useRef();
+
+  const redraw = () => {
+    layerRef.current.draw();
+  }
 
   return (
     <div>
@@ -17,10 +22,10 @@ const GameBoard = (props) => {
         className="game_board"
       >
         <GameBoardBackground highlightedFields={props.highlightedFields}/>
-        <Layer>
+        <Layer ref={layerRef}>
           {
             props.pieces.map((piece)=> {
-              return <GamePiece key={piece.fieldNo} piece={piece} piecePickUpDropCallback={props.piecePickUpDropCallback}/>
+              return <GamePiece key={piece.fieldNo} piece={piece} piecePickUpDropCallback={props.piecePickUpDropCallback} redrawParent={redraw} />
             })
           }
         </Layer>

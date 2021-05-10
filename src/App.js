@@ -64,15 +64,16 @@ function App() {
     
   }, [gameState]);
 
-  const piecePickUpDropCallback = (piece, pickedUpOrDropped) => {
+  const piecePickUpDropCallback = (piece, pickedUpOrDropped, dropFieldNo=undefined) => {
     // pickedUpOrDropped: true menas picked up, false dropped down
     // TODO: Highlight possible moves
-    if (pickedUpOrDropped) {
+    if (pickedUpOrDropped) { // picked up
       setSelectedPiece(piece);
       setHighlightedFields([piece.fieldNo]);
-    } else {
+    } else { // dropped
       setSelectedPiece(null);
       setHighlightedFields([]);
+      socket.current.send(`Move;${piece.fieldNo};${dropFieldNo}`)
     }
   };
 
@@ -100,6 +101,8 @@ function App() {
     socket.current.onmessage = (e) => {
       console.log("Server said: ", e.data);
       const tmp = e.data.split(';');
+      var piece;
+      var fieldNo;
       switch(tmp[0]) {
         case 'Welcome':
             setConnectionState(ConnectionState.LOOKING_FOR_OPPONENT);
@@ -109,14 +112,14 @@ function App() {
           setConnectionState(ConnectionState.LOOKING_FOR_OPPONENT);
           break;
         case 'StartGame':
-          setConnectionState(GameState.IN_GAME);
+          setConnectionState(ConnectionState.IN_GAME);
           setGameState.apply(GameState.LIGHT_TURN);
           setMyColor(parseInt(tmp[1]));
           setGamePieces(JSON.parse(tmp[2]).map((piece) => {
             return new GamePieceModel(piece.color, piece.type, piece.field_no)
           }));
           break;
-        case "CurrentState":
+        case 'CurrentState':
           setMyColor(parseInt(tmp[1]));
           // TODO: Set connection state
           setConnectionState(ConnectionState.IN_GAME);
@@ -124,6 +127,13 @@ function App() {
           setGamePieces(JSON.parse(tmp[3]).map((piece) => {
             return new GamePieceModel(piece.color, piece.type, piece.field_no)
           }));
+          break;
+        case 'WrongMove':
+          // TODO: Handle it. Maybe show some message?
+          fieldNo = parseInt(tmp[1]);
+          piece = gamePieces.filter(function (piece) {return piece.fieldNo === fieldNo})[0];
+          piece.resetPositionFunc();
+          break;
         }
     };
   });

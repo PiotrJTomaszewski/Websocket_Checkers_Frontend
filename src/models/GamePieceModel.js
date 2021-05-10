@@ -19,7 +19,6 @@ class GamePieceModel {
         this.fieldNo = fieldNo;
         const fieldsInRow = 8;
         const fieldsInCol = 4; // Only 4 usable fields in col
-        const totalFields = fieldsInRow * fieldsInRow;
         const totalUsableFields = fieldsInCol * fieldsInRow;
         var fieldSize = 1000 / fieldsInRow; // TODO: Don't use hardcoded value
         const col = (totalUsableFields - fieldNo) % fieldsInCol;
@@ -31,6 +30,10 @@ class GamePieceModel {
             this.x += fieldSize;
         }
         this.y = row * yFieldSize + fieldSize / 2;
+    }
+
+    setResetPositionFunc(resetPositionFunc) {
+        this.resetPositionFunc = resetPositionFunc;
     }
 }
 
