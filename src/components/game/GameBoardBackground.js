@@ -3,19 +3,30 @@ import { Layer, Shape } from "react-konva";
 
 const GameBoardBackground = (props) => {
   const fieldsInRow = 8;
+  const fieldsInCol = 4 // Only 4 usable fields in col
   const totalFields = fieldsInRow * fieldsInRow;
+  const totalUsableFields = fieldsInCol * fieldsInRow;
   const fieldSize = 1000 / fieldsInRow; // TODO: Don't use hardcoded size
+
+  function fieldNoToXY(fieldNo) {
+    const col = (totalUsableFields - fieldNo) % fieldsInCol;
+    const row = Math.floor((totalUsableFields - fieldNo) / fieldsInCol);
+    const xFieldSize = 2 * fieldSize; // There is unused white field between fields in row
+    const yFieldSize = fieldSize;
+    let x = col * xFieldSize;
+    if (row % 2 == 0) { // Even rows start with an unused field
+        x += fieldSize;
+    }
+    let y = row * yFieldSize;
+    return {'x': x, 'y': y}
+  }
 
   const colorizeFields = (ctx) => {
     // Color usable fields
     ctx.fillStyle = "#0F0";
-    for (let i = 0; i < fieldsInRow; i++) {
-      let startJ = i % 2 == 0 ? 1 : 0;
-      for (let j = startJ; j < fieldsInRow; j += 2) {
-        let x = ((i * fieldsInRow + j) % fieldsInRow) * fieldSize;
-        let y = Math.floor((i * fieldsInRow + j) / fieldsInRow) * fieldSize;
-        ctx.fillRect(x, y, fieldSize, fieldSize);
-      }
+    for (let i=1; i < totalUsableFields; i++) {
+      let xy = fieldNoToXY(i);
+      ctx.fillRect(xy.x, xy.y, fieldSize, fieldSize);
     }
   };
 
@@ -32,10 +43,13 @@ const GameBoardBackground = (props) => {
     }
 
     // Put field numbers
-    for (let i = 0; i < totalFields; i++) {
-      var x = (i % fieldsInRow) * fieldSize + fieldSize / 2;
-      var y = Math.floor(i / fieldsInRow) * fieldSize + fieldSize - 3;
-      ctx.fillText(totalFields - i, x, y);
+    for (let i = 1; i <= totalUsableFields; i++) {
+      // var x = (i % fieldsInRow) * fieldSize + fieldSize / 2;
+      // var y = Math.floor(i / fieldsInRow) * fieldSize + fieldSize - 3;
+      let xy = fieldNoToXY(i);
+      let x = xy.x + fieldSize / 2;
+      let y = xy.y + fieldSize - 3;
+      ctx.fillText(i, x, y);
     }
   };
 
@@ -44,9 +58,8 @@ const GameBoardBackground = (props) => {
     ctx.fillStyle = "#FF0";
     console.log('Fields to highlight', props.highlightedFields)
     props.highlightedFields.forEach((fieldNo) => {
-      let x = ((totalFields - fieldNo) % fieldsInRow) * fieldSize;
-      let y = Math.floor((totalFields - fieldNo) / fieldsInRow) * fieldSize;
-      ctx.fillRect(x, y, fieldSize, fieldSize);
+      let xy = fieldNoToXY(fieldNo);
+      ctx.fillRect(xy.x, xy.y, fieldSize, fieldSize);
     });
     ctx.restore();
   };
