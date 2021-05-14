@@ -6,7 +6,7 @@ import Loading from "./components/Loading";
 import Header from "./components/Header";
 import GameBoard from "./components/game/GameBoard";
 import { GameState } from "./models/GameModel";
-import GamePieceModel from "./models/GamePieceModel";
+import GamePieceModel, { GamePieceType } from "./models/GamePieceModel";
 
 const ConnectionState = {
   CONNECTING: 0,
@@ -106,6 +106,7 @@ function App() {
       var fieldNo;
       var targetFieldNo;
       var capturedFieldNo;
+      var promote;
       var endTurn;
       switch(tmp[0]) {
         case 'Welcome':
@@ -142,10 +143,14 @@ function App() {
         fieldNo = parseInt(tmp[1]);
         targetFieldNo = parseInt(tmp[2]);
         endTurn = tmp[3] === 'True';
-        capturedFieldNo = parseInt(tmp[4]);
+        promote = tmp[4] === 'True';
+        capturedFieldNo = parseInt(tmp[5]);
         setGamePieces(gamePieces.map((piece) => {
           if (piece.fieldNo === fieldNo) {
             piece.setField(targetFieldNo);
+            if (promote) {
+              piece.type = GamePieceType.KING;
+            }
           }
           if (piece.fieldNo === capturedFieldNo) {
             piece.setField(nextNegativeField);
