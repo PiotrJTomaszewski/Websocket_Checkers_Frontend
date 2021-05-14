@@ -35,23 +35,24 @@ const GamePiece = (props) => {
   };
 
   const onDragEndCallback = (e) => {
-    const canvas = e.target.parent.canvas._canvas;
-    const canvasLeft = canvas.offsetLeft + canvas.clientLeft;
-    const canvasTop = canvas.offsetTop + canvas.clientTop;
-    const x = e.target.x() - canvasLeft;
-    const y = e.target.y() - canvasTop;
+    // const canvas = e.target.parent.canvas._canvas;
+    // const canvasLeft = canvas.offsetLeft + canvas.clientLeft;
+    // const canvasTop = canvas.offsetTop + canvas.clientTop;
+    const x = e.evt.layerX;
+    const y = e.evt.layerY;
     const fieldsInRow = 8;
     const fieldsInCol = 4;
     const totalUsableFields = fieldsInCol * fieldsInRow;
     const fieldSize = 1000 / fieldsInRow; // TODO: Don't use hardcoded values
-    var newFieldNo =
-      totalUsableFields -
-      Math.floor(x / fieldSize) -
-      fieldsInRow * Math.floor(y / fieldSize);
-    const dropCol = Math.floor(x / fieldSize);
-    const dropRow = Math.floor(y / fieldSize);
-    if (dropRow % 2 != dropCol % 2) {
-      // Check if piece was dropped on the usable field
+    const xFieldSize = 2 * fieldSize; // There is unused white field between fields in a row
+    const yFieldSize = fieldSize;
+    const dropCol = Math.floor(x / xFieldSize);
+    const dropRow = Math.floor(y / yFieldSize);
+    var newFieldNo = totalUsableFields - dropCol - fieldsInCol * dropRow;
+    // Check whether the piece was dropped on a dark or a white field
+    const dropColFullBoard = Math.floor(x / fieldSize);
+    if (dropRow % 2 != dropColFullBoard % 2) {
+      console.log("Dropped on:", newFieldNo);
       props.piecePickUpDropCallback(props.piece, false, newFieldNo);
     } else {
       resetPosition();
