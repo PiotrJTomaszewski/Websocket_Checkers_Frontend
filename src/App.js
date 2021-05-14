@@ -23,6 +23,7 @@ function App() {
   const [highlightedFields, setHighlightedFields] = useState([]);
   const [gamePieces, setGamePieces] = useState([]);
   const [myColor, setMyColor] = useState(null);
+  const [nextNegativeField, setNextNegativeField] = useState(-1);
 
   const URL = "ws://localhost:8888/ws";
   const PROTOCOL_NAME = "checkers_game";
@@ -103,6 +104,9 @@ function App() {
       const tmp = e.data.split(';');
       var piece;
       var fieldNo;
+      var targetFieldNo;
+      var capturedFieldNo;
+      var endTurn;
       switch(tmp[0]) {
         case 'Welcome':
             setConnectionState(ConnectionState.LOOKING_FOR_OPPONENT);
@@ -113,7 +117,7 @@ function App() {
           break;
         case 'StartGame':
           setConnectionState(ConnectionState.IN_GAME);
-          setGameState.apply(GameState.LIGHT_TURN);
+          setGameState(GameState.LIGHT_TURN);
           setMyColor(parseInt(tmp[1]));
           setGamePieces(JSON.parse(tmp[2]).map((piece) => {
             return new GamePieceModel(piece.color, piece.type, piece.field_no)
@@ -134,6 +138,29 @@ function App() {
           piece = gamePieces.filter(function (piece) {return piece.fieldNo === fieldNo})[0];
           piece.resetPositionFunc();
           break;
+        case 'Move':
+        fieldNo = parseInt(tmp[1]);
+        targetFieldNo = parseInt(tmp[2]);
+        endTurn = tmp[3] === 'True';
+        capturedFieldNo = parseInt(tmp[4]);
+        setGamePieces(gamePieces.map((piece) => {
+          if (piece.fieldNo === fieldNo) {
+            piece.setField(targetFieldNo);
+          }
+          if (piece.fieldNo === capturedFieldNo) {
+            piece.setField(nextNegativeField);
+          }
+          return piece;
+        }));
+        if (capturedFieldNo) {
+          setNextNegativeField(nextNegativeField-1);
+        }
+          break;
+        }
+        if (endTurn) {
+          setGameState(
+            gameState === GameState.LIGHT_TURN ? GameState.DARK_TURN : GameState.LIGHT_TURN
+          )
         }
     };
   });
