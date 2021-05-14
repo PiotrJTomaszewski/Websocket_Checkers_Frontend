@@ -60,15 +60,73 @@ class GamePieceModel {
         this.resetPositionFunc = resetPositionFunc;
     }
 
+    getPossibleCaptures(piecesDict, row, col) {
+        const opponentColor = this.color === GamePieceColor.LIGHT ? GamePieceColor.DARK : GamePieceColor.LIGHT;
+        var possibleMoves = [];
+        if (this.color === GamePieceColor.DARK || this.type === GamePieceType.KING) {
+            if (row % 2 === 0) {
+                // Two up left
+                if (getPieceColor(row+2, col+1, piecesDict) === null && getPieceColor(row+1, col+1, piecesDict) === opponentColor) {
+                    console.log("Two up left")
+                    possibleMoves.push(rowCol2FieldNo(row+2, col+1))
+                }
+                // Two up right
+                if (getPieceColor(row+2, col-1, piecesDict) === null && getPieceColor(row+1, col, piecesDict) === opponentColor) {
+                    console.log("Two up right")
+                    possibleMoves.push(rowCol2FieldNo(row+2, col-1));
+                }
+            } else {
+                // Two up left
+                if (getPieceColor(row+2, col+1, piecesDict) === null && getPieceColor(row+1, col, piecesDict) === opponentColor) {
+                    console.log("Two up left")
+                    possibleMoves.push(rowCol2FieldNo(row+2, col+1));
+                }
+                // Two up right
+                if (getPieceColor(row+2, col-1, piecesDict) === null && getPieceColor(row+1, col-1, piecesDict) === opponentColor) {
+                    console.log("Two up right")
+                    possibleMoves.push(rowCol2FieldNo(row+2, col-1));
+                }
+            }
+        }
+        if (this.color === GamePieceColor.LIGHT || this.type === GamePieceType.KING) {
+            if (row % 2 === 0) {
+                // Two down left
+                if (getPieceColor(row-2, col+1, piecesDict) === null && getPieceColor(row-1, col+1, piecesDict) === opponentColor) {
+                    console.log("Two down left")
+                    possibleMoves.push(rowCol2FieldNo(row-2, col+1));
+                }
+                // Two down right
+                if (getPieceColor(row-2, col-1, piecesDict) === null && getPieceColor(row-1, col, piecesDict) === opponentColor) {
+                    console.log("Two down right")
+                    possibleMoves.push(rowCol2FieldNo(row-2, col-1));
+                }
+            } else {
+                // Two down left
+                if (getPieceColor(row-2, col+1, piecesDict) === null && getPieceColor(row-1, col, piecesDict) === opponentColor) {
+                    console.log("Two down left")
+                    possibleMoves.push(rowCol2FieldNo(row-2, col+1));
+                }
+                // Two down right
+                if (getPieceColor(row-2, col-1, piecesDict) === null && getPieceColor(row-1, col-1, piecesDict) === opponentColor) {
+                    console.log("Two down right")
+                    possibleMoves.push(rowCol2FieldNo(row-2, col-1));
+                }
+            }
+        }
+        return possibleMoves;
+    }
+
     getPossibleMoves(otherPieces) {
         var piecesDict = {};
-        var possibleMoves = [];
         otherPieces.forEach((piece) => {
             piecesDict[piece.fieldNo] = piece;
         });
-        const col = (this.fieldNo - 1) % fieldsInCol;
         const row = Math.floor((this.fieldNo - 1) / fieldsInCol);
-        const opponentColor = this.color === GamePieceColor.LIGHT ? GamePieceColor.DARK : GamePieceColor.LIGHT;
+        const col = (this.fieldNo - 1) % fieldsInCol;
+        var possibleMoves = this.getPossibleCaptures(piecesDict, row, col);
+        if (possibleMoves.length > 0) {
+            return possibleMoves;
+        }
         if (this.color === GamePieceColor.DARK || this.type === GamePieceType.KING) {
             if (row % 2 === 0) {
                 // One up left
@@ -81,16 +139,6 @@ class GamePieceModel {
                     console.log("One down right")
                     possibleMoves.push(rowCol2FieldNo(row+1, col))
                 }
-                // Two up left
-                if (getPieceColor(row+2, col+1, piecesDict) === null && getPieceColor(row+1, col+1, piecesDict) === opponentColor) {
-                    console.log("Two up left")
-                    possibleMoves.push(rowCol2FieldNo(row+2, col+1))
-                }
-                // Two up right
-                if (getPieceColor(row+2, col-1, piecesDict) === null && getPieceColor(row+1, col, piecesDict) === opponentColor) {
-                    console.log("Two up right")
-                    possibleMoves.push(rowCol2FieldNo(row+2, col-1));
-                }
             } else {
                 // One up left
                 if (getPieceColor(row+1, col, piecesDict) === null) {
@@ -101,16 +149,6 @@ class GamePieceModel {
                 if (getPieceColor(row+1, col-1, piecesDict) === null) {
                     console.log("One up right")
                     possibleMoves.push(rowCol2FieldNo(row+1, col-1));
-                }
-                // Two up left
-                if (getPieceColor(row+2, col+1, piecesDict) === null && getPieceColor(row+1, col, piecesDict) === opponentColor) {
-                    console.log("Two up left")
-                    possibleMoves.push(rowCol2FieldNo(row+2, col+1));
-                }
-                // Two up right
-                if (getPieceColor(row+2, col-1, piecesDict) === null && getPieceColor(row+1, col-1, piecesDict) === opponentColor) {
-                    console.log("Two up right")
-                    possibleMoves.push(rowCol2FieldNo(row+2, col-1));
                 }
             }
         }
@@ -126,16 +164,6 @@ class GamePieceModel {
                     console.log("One down right")
                     possibleMoves.push(rowCol2FieldNo(row-1, col));
                 }
-                // Two down left
-                if (getPieceColor(row-2, col+1, piecesDict) === null && getPieceColor(row-1, col+1, piecesDict) === opponentColor) {
-                    console.log("Two down left")
-                    possibleMoves.push(rowCol2FieldNo(row-2, col+1));
-                }
-                // Two down right
-                if (getPieceColor(row-2, col-1, piecesDict) === null && getPieceColor(row-1, col, piecesDict) === opponentColor) {
-                    console.log("Two down right")
-                    possibleMoves.push(rowCol2FieldNo(row-2, col-1));
-                }
             } else {
                 // One down left
                 if (getPieceColor(row-1, col, piecesDict) === null) {
@@ -146,16 +174,6 @@ class GamePieceModel {
                 if (getPieceColor(row-1, col-1, piecesDict) === null) {
                     console.log("One down right")
                     possibleMoves.push(rowCol2FieldNo(row-1, col-1));
-                }
-                // Two down left
-                if (getPieceColor(row-2, col+1, piecesDict) === null && getPieceColor(row-1, col, piecesDict) === opponentColor) {
-                    console.log("Two down left")
-                    possibleMoves.push(rowCol2FieldNo(row-2, col+1));
-                }
-                // Two down right
-                if (getPieceColor(row-2, col-1, piecesDict) === null && getPieceColor(row-1, col-1, piecesDict) === opponentColor) {
-                    console.log("Two down right")
-                    possibleMoves.push(rowCol2FieldNo(row-2, col-1));
                 }
             }
         }
