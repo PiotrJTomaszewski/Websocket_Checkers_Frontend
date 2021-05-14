@@ -23,6 +23,7 @@ function App() {
     ConnectionState.CONNECTING
   );
   const [gameState, setGameState] = useState(GameState.NOT_STARTED);
+  const [loading, setLoading] = useState({ show: false, content: "" });
   const [selectedPiece, setSelectedPiece] = useState(null);
   const [highlightedFields, setHighlightedFields] = useState([]);
   const [gamePieces, setGamePieces] = useState([]);
@@ -60,6 +61,9 @@ function App() {
   useEffect(() => {
     var playerUUID;
     switch (connectionState) {
+      case ConnectionState.CONNECTING:
+        setLoading({show: true, content: "Connecting to server, please wait"});
+        break;
       case ConnectionState.CONNECTED:
         playerUUID = localStorage.getItem("UUID");
         if (playerUUID === null) {
@@ -69,7 +73,14 @@ function App() {
           console.log("Sent:", `JoinExisting;${playerUUID}`);
           socket.current.send(`JoinExisting;${playerUUID}`);
         }
+        setLoading({show: true, content: "Joining a game room, please wait"});
         break;
+        case ConnectionState.LOOKING_FOR_OPPONENT:
+          setLoading({show: true, content: "Looking for an opponent, please wait"});
+          break;
+        default:
+          setLoading({show: false});
+          break;
     }
     console.log("New connection state:", connectionState);
   }, [connectionState]);
@@ -180,48 +191,6 @@ function App() {
           "Neither you nor your opponent can make any move, it's a tie!";
         setEndGameCard({ show: true, title: title, content: content });
         break;
-    }
-  };
-
-  const getMainElement = () => {
-    switch (connectionState) {
-      case ConnectionState.CONNECTING:
-        return <Loading text="Connecting to server, please wait" />;
-      case ConnectionState.CONNECTED:
-        return <Loading text="Joining a game room, please wait" />;
-      case ConnectionState.LOOKING_FOR_OPPONENT:
-        return <Loading text="Looking for an opponent, please wait" />;
-      default:
-        return (
-          <div>
-            <Modal show={endGameCard.show} onHide={hideEndGameCard}>
-              <Modal.Header closeButton>
-                <Modal.Title>{endGameCard.title}</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>{endGameCard.content}</Modal.Body>
-              <Modal.Footer>
-                <Button variant="primary" onClick={hideEndGameCard}>
-                  Close
-                </Button>
-              </Modal.Footer>
-            </Modal>
-            <Alert
-              className="info_box"
-              show={infoMessage.show}
-              key={1}
-              variant={infoMessage.type}
-              onClose={() => setInfoMessage({ ...infoMessage, show: false })}
-              dismissible
-            >
-              {infoMessage.content}
-            </Alert>
-            <GameBoard
-              piecePickUpDropCallback={piecePickUpDropCallback}
-              pieces={gamePieces}
-              highlightedFields={highlightedFields}
-            />
-          </div>
-        );
     }
   };
 
@@ -355,7 +324,37 @@ function App() {
   return (
     <div>
       <Header myColor={myColor} gameState={gameState} />
-      <Container>{getMainElement()}</Container>
+      <Container>
+        <div>
+          <Loading show={loading.show} text={loading.content} />
+          <Modal show={endGameCard.show} onHide={hideEndGameCard}>
+            <Modal.Header closeButton>
+              <Modal.Title>{endGameCard.title}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>{endGameCard.content}</Modal.Body>
+            <Modal.Footer>
+              <Button variant="primary" onClick={hideEndGameCard}>
+                Close
+              </Button>
+            </Modal.Footer>
+          </Modal>
+          <Alert
+            className="info_box"
+            show={infoMessage.show}
+            key={1}
+            variant={infoMessage.type}
+            onClose={() => setInfoMessage({ ...infoMessage, show: false })}
+            dismissible
+          >
+            {infoMessage.content}
+          </Alert>
+          <GameBoard
+            piecePickUpDropCallback={piecePickUpDropCallback}
+            pieces={gamePieces}
+            highlightedFields={highlightedFields}
+          />
+        </div>
+      </Container>
     </div>
   );
 }
