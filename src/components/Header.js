@@ -4,7 +4,7 @@ import { Navbar } from "react-bootstrap";
 import lightPieceImg from "../assets/light_man.png";
 import darkPieceImg from "../assets/dark_man.png";
 import { GamePieceColor } from "../models/GamePieceModel";
-import { GameState } from "../models/GameModel";
+import GameState from "../models/GameState";
 
 const Header = (props) => {
   var image;
@@ -64,7 +64,7 @@ const Header = (props) => {
       <Navbar.Collapse className="justify-content-end">
         <Navbar.Text>
           {gameStateText}
-          <img class="player_piece_img" src={image} />
+          <img className="player_piece_img" src={image} />
         </Navbar.Text>
       </Navbar.Collapse>
     </Navbar>

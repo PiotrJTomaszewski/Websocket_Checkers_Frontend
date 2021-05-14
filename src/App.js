@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Container } from "react-bootstrap";
+import { Container, Modal, Button } from "react-bootstrap";
 
 import "./App.css";
 import Loading from "./components/Loading";
 import Header from "./components/Header";
 import GameBoard from "./components/game/GameBoard";
-import { GameState } from "./models/GameModel";
-import GamePieceModel, { GamePieceType } from "./models/GamePieceModel";
+import GameState from "./models/GameState";
+import GamePieceModel, { GamePieceColor, GamePieceType } from "./models/GamePieceModel";
 
 const ConnectionState = {
   CONNECTING: 0,
@@ -24,6 +24,7 @@ function App() {
   const [gamePieces, setGamePieces] = useState([]);
   const [myColor, setMyColor] = useState(null);
   const [nextNegativeField, setNextNegativeField] = useState(-1);
+  const [endGameCard, setEndGameCard] = useState({"show": false, "title": "", content: ""});
 
   const URL = "ws://localhost:8888/ws";
   const PROTOCOL_NAME = "checkers_game";
@@ -61,13 +62,12 @@ function App() {
   }, [connectionState]);
 
   // On game state change
-  useEffect(() => {
+  // useEffect(() => {
     
-  }, [gameState]);
+  // }, [gameState]);
 
   const piecePickUpDropCallback = (piece, pickedUpOrDropped, dropFieldNo=undefined) => {
     // pickedUpOrDropped: true menas picked up, false dropped down
-    // TODO: Highlight possible moves
     if (pickedUpOrDropped) { // picked up
       setSelectedPiece(piece);
       setHighlightedFields(piece.getPossibleMoves(gamePieces));
@@ -78,6 +78,40 @@ function App() {
     }
   };
 
+  const hideEndGameCard = () => {
+    setEndGameCard({...endGameCard, show: false});
+  }
+
+  const showEndGameCardIfNeeded = () => {
+    var title;
+    var content;
+    switch (gameState) {
+      case GameState.DARK_WON:
+        title = "Dark player has won!"
+        if (myColor == GamePieceColor.DARK) {
+          content = "Congratulations, you've won the game!";
+        } else {
+          content = "Unfortunatelly, you've lost the game";
+        }
+        setEndGameCard({show: true, title: title, content: content});
+        break;
+      case GameState.LIGHT_WON:
+        title = "Light player has won!"
+        if (myColor == GamePieceColor.LIGHT) {
+          content = "Congratulations, you've won the game!";
+        } else {
+          content = "Unfortunatelly, you've lost the game";
+        }
+        setEndGameCard({show: true, title: title, content: content});
+        break;
+      case GameState.TIE:
+        title = "The game has ended with a tie";
+        content = "Neither you nor your opponent can make any move, it's a tie!"
+        setEndGameCard({show: true, title: title, content: content});
+        break;
+    }
+  }
+
   const getMainElement = () => {
     switch (connectionState) {
       case ConnectionState.CONNECTING:
@@ -86,13 +120,26 @@ function App() {
         return <Loading text="Joining a game room, please wait" />;
       case ConnectionState.LOOKING_FOR_OPPONENT:
         return <Loading text="Looking for an opponent, please wait" />;
-      case ConnectionState.IN_GAME:
+      default:
         return (
-          <GameBoard
-            piecePickUpDropCallback={piecePickUpDropCallback}
-            pieces={gamePieces}
-            highlightedFields={highlightedFields}
-          />
+          <div>
+            <Modal show={endGameCard.show} onHide={hideEndGameCard}>
+              <Modal.Header closeButton>
+                <Modal.Title>{endGameCard.title}</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>{endGameCard.content}</Modal.Body>
+              <Modal.Footer>
+                <Button variant="primary" onClick={hideEndGameCard}>
+                  Close
+                </Button>
+              </Modal.Footer>
+            </Modal>
+            <GameBoard
+              piecePickUpDropCallback={piecePickUpDropCallback}
+              pieces={gamePieces}
+              highlightedFields={highlightedFields}
+            />
+          </div>
         );
     }
   };
@@ -132,6 +179,7 @@ function App() {
           setGamePieces(JSON.parse(tmp[3]).map((piece) => {
             return new GamePieceModel(piece.color, piece.type, piece.field_no)
           }));
+          showEndGameCardIfNeeded();
           break;
         case 'WrongMove':
           // TODO: Handle it. Maybe show some message?
@@ -140,32 +188,35 @@ function App() {
           piece.resetPositionFunc();
           break;
         case 'Move':
-        fieldNo = parseInt(tmp[1]);
-        targetFieldNo = parseInt(tmp[2]);
-        endTurn = tmp[3] === 'True';
-        promote = tmp[4] === 'True';
-        capturedFieldNo = parseInt(tmp[5]);
-        setGamePieces(gamePieces.map((piece) => {
-          if (piece.fieldNo === fieldNo) {
-            piece.setField(targetFieldNo);
-            if (promote) {
-              piece.type = GamePieceType.KING;
+          fieldNo = parseInt(tmp[1]);
+          targetFieldNo = parseInt(tmp[2]);
+          endTurn = tmp[3] === 'True';
+          promote = tmp[4] === 'True';
+          capturedFieldNo = parseInt(tmp[5]);
+          setGamePieces(gamePieces.map((piece) => {
+            if (piece.fieldNo === fieldNo) {
+              piece.setField(targetFieldNo);
+              if (promote) {
+                piece.type = GamePieceType.KING;
+              }
             }
+            if (piece.fieldNo === capturedFieldNo) {
+              piece.setField(nextNegativeField);
+            }
+            return piece;
+          }));
+          if (capturedFieldNo) {
+            setNextNegativeField(nextNegativeField-1);
           }
-          if (piece.fieldNo === capturedFieldNo) {
-            piece.setField(nextNegativeField);
+          if (endTurn) {
+            setGameState(
+              gameState === GameState.LIGHT_TURN ? GameState.DARK_TURN : GameState.LIGHT_TURN
+            );
           }
-          return piece;
-        }));
-        if (capturedFieldNo) {
-          setNextNegativeField(nextNegativeField-1);
-        }
           break;
-        }
-        if (endTurn) {
-          setGameState(
-            gameState === GameState.LIGHT_TURN ? GameState.DARK_TURN : GameState.LIGHT_TURN
-          )
+        case 'GameEnd':
+          setGameState(parseInt(tmp[1]));
+          showEndGameCardIfNeeded();
         }
     };
   });

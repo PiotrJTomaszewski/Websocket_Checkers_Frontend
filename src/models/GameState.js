@@ -7,8 +7,4 @@ const GameState = {
     TIE: 6
 }
 
-class GameModel {
-
-}
-
-export {GameModel as default, GameState};
+export {GameState as default};
