@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Container, Modal, Button } from "react-bootstrap";
+import { Container, Modal, Button, Alert } from "react-bootstrap";
 
 import "./App.css";
 import Loading from "./components/Loading";
 import Header from "./components/Header";
 import GameBoard from "./components/game/GameBoard";
-import GameState from "./models/GameState";
+import GameState, { GameError } from "./models/GameModel";
 import GamePieceModel, { GamePieceColor, GamePieceType } from "./models/GamePieceModel";
 
 const ConnectionState = {
@@ -24,7 +24,8 @@ function App() {
   const [gamePieces, setGamePieces] = useState([]);
   const [myColor, setMyColor] = useState(null);
   const [nextNegativeField, setNextNegativeField] = useState(-1);
-  const [endGameCard, setEndGameCard] = useState({"show": false, "title": "", content: ""});
+  const [endGameCard, setEndGameCard] = useState({show: false, title: "", content: ""});
+  const [infoMessage, setInfoMessage] = useState({show: false, type: "", content: ""})
 
   const URL = "ws://localhost:8888/ws";
   const PROTOCOL_NAME = "checkers_game";
@@ -105,7 +106,6 @@ function App() {
         }))
       break;
     }
-    
   }, [gameState]);
 
   const piecePickUpDropCallback = (piece, pickedUpOrDropped, dropFieldNo=undefined) => {
@@ -176,6 +176,9 @@ function App() {
                 </Button>
               </Modal.Footer>
             </Modal>
+            <Alert className="info_box" show={infoMessage.show} key={1} variant={infoMessage.type} onClose={() => setInfoMessage({...infoMessage, show: false})} dismissible>
+              {infoMessage.content}
+            </Alert>
             <GameBoard
               piecePickUpDropCallback={piecePickUpDropCallback}
               pieces={gamePieces}
@@ -197,6 +200,8 @@ function App() {
       var capturedFieldNo;
       var promote;
       var endTurn;
+      var errorCode;
+      var content;
       switch(tmp[0]) {
         case 'Welcome':
             setConnectionState(ConnectionState.LOOKING_FOR_OPPONENT);
@@ -224,10 +229,35 @@ function App() {
           showEndGameCardIfNeeded();
           break;
         case 'WrongMove':
-          // TODO: Handle it. Maybe show some message?
           fieldNo = parseInt(tmp[1]);
+          errorCode = parseInt(tmp[2]);
           piece = gamePieces.filter(function (piece) {return piece.fieldNo === fieldNo})[0];
           piece.resetPositionFunc();
+          content = "Wrong move! ";
+          switch (errorCode) {
+            case GameError.CANT_MOVE_PIECE:
+              content += "The piece cannot move to the chosen field";
+              break;
+            case GameError.FIELD_TAKEN:
+              content += "The chosen field is taken";
+              break;
+            case GameError.ILLEGAL_MOVE:
+              content += "This move is illegal";
+              break;
+            case GameError.MUST_CAPTURE:
+              content += "You have a possibility to capture so you have to do it";
+              break;
+            case GameError.NOT_KING:
+              content += "The chosen piece is not a king so it cannot move backwards";
+              break;
+            case GameError.NOT_YOUR_PIECE:
+              content += "The chosen piece doesn't belong to you";
+              break;
+            case GameError.NOT_YOUR_TURN:
+              content += "It's not your turn";
+              break;
+          }
+          setInfoMessage({show: true, type: "danger", content: content});
           break;
         case 'Move':
           fieldNo = parseInt(tmp[1]);

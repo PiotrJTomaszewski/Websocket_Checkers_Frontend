@@ -4,7 +4,7 @@ import { Navbar } from "react-bootstrap";
 import lightPieceImg from "../assets/light_man.png";
 import darkPieceImg from "../assets/dark_man.png";
 import { GamePieceColor } from "../models/GamePieceModel";
-import GameState from "../models/GameState";
+import GameState from "../models/GameModel";
 
 const Header = (props) => {
   var image;
