@@ -11,23 +11,24 @@ const GameBoard = (props) => {
 
   const redraw = () => {
     layerRef.current.draw();
-  }
+  };
 
   return (
     <div>
       <h2>{props.name}</h2>
-      <Stage
-        width={1000}
-        height={1000}
-        className="game_board"
-      >
-        <GameBoardBackground highlightedFields={props.highlightedFields}/>
+      <Stage width={1000} height={1000} className="game_board">
+        <GameBoardBackground highlightedFields={props.highlightedFields} />
         <Layer ref={layerRef}>
-          {
-            props.pieces.map((piece)=> {
-              return <GamePiece key={piece.fieldNo} piece={piece} piecePickUpDropCallback={props.piecePickUpDropCallback} redrawParent={redraw} />
-            })
-          }
+          {props.pieces.map((piece) => {
+            return (
+              <GamePiece
+                key={piece.fieldNo}
+                piece={piece}
+                piecePickUpDropCallback={props.piecePickUpDropCallback}
+                redrawParent={redraw}
+              />
+            );
+          })}
         </Layer>
       </Stage>
     </div>

@@ -62,7 +62,7 @@ const GamePiece = (props) => {
   const resetPosition = () => {
     pieceRef.current.position({ x: props.piece.x, y: props.piece.y });
     props.redrawParent();
-  }
+  };
 
   return (
     <Image

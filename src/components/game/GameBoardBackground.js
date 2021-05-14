@@ -3,7 +3,7 @@ import { Layer, Shape } from "react-konva";
 
 const GameBoardBackground = (props) => {
   const fieldsInRow = 8;
-  const fieldsInCol = 4 // Only 4 usable fields in col
+  const fieldsInCol = 4; // Only 4 usable fields in col
   const totalFields = fieldsInRow * fieldsInRow;
   const totalUsableFields = fieldsInCol * fieldsInRow;
   const fieldSize = 1000 / fieldsInRow; // TODO: Don't use hardcoded size
@@ -14,17 +14,18 @@ const GameBoardBackground = (props) => {
     const xFieldSize = 2 * fieldSize; // There is unused white field between fields in row
     const yFieldSize = fieldSize;
     let x = col * xFieldSize;
-    if (row % 2 == 0) { // Even rows start with an unused field
-        x += fieldSize;
+    if (row % 2 == 0) {
+      // Even rows start with an unused field
+      x += fieldSize;
     }
     let y = row * yFieldSize;
-    return {'x': x, 'y': y}
+    return { x: x, y: y };
   }
 
   const colorizeFields = (ctx) => {
     // Color usable fields
     ctx.fillStyle = "#0F0";
-    for (let i=1; i <= totalUsableFields; i++) {
+    for (let i = 1; i <= totalUsableFields; i++) {
       let xy = fieldNoToXY(i);
       ctx.fillRect(xy.x, xy.y, fieldSize, fieldSize);
     }
@@ -54,7 +55,7 @@ const GameBoardBackground = (props) => {
   const highlightFields = (ctx) => {
     ctx.save();
     ctx.fillStyle = "#FF0";
-    console.log('Fields to highlight', props.highlightedFields)
+    console.log("Fields to highlight", props.highlightedFields);
     props.highlightedFields.forEach((fieldNo) => {
       let xy = fieldNoToXY(fieldNo);
       ctx.fillRect(xy.x, xy.y, fieldSize, fieldSize);
