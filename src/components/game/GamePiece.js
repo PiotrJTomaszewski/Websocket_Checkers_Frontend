@@ -70,7 +70,7 @@ const GamePiece = (props) => {
       x={props.piece.x}
       y={props.piece.y}
       ref={pieceRef}
-      draggable
+      draggable={props.piece.moveable}
       onDragStart={(e) => onDragStartCallback(e)}
       onDragEnd={(e) => {
         onDragEndCallback(e);

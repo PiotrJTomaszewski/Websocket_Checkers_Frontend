@@ -30,10 +30,11 @@ function getPieceColor(row, col, piecesDict) {
 }
 
 class GamePieceModel {
-    constructor(color, type, fieldNo) {
+    constructor(color, type, fieldNo, moveable=false) {
         this.color = color;
         this.type = type;
         this.setField(fieldNo);
+        this.moveable = moveable;
     }
 
     setField(fieldNo) {

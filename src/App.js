@@ -62,9 +62,51 @@ function App() {
   }, [connectionState]);
 
   // On game state change
-  // useEffect(() => {
+  useEffect(() => {
+    switch(gameState) {
+      case GameState.LIGHT_TURN:
+        if (myColor === GamePieceColor.LIGHT) {
+          setGamePieces(gamePieces.map((piece) => {
+            if (piece.color === myColor) {
+              piece.moveable = true;
+            } else {
+              piece.moveable = false;
+            }
+            return piece;
+          }));
+        } else {
+          setGamePieces(gamePieces.map((piece) => {
+            piece.moveable = false;
+            return piece;
+          }));
+        }
+      break;
+      case GameState.DARK_TURN:
+        if (myColor === GamePieceColor.DARK) {
+          setGamePieces(gamePieces.map((piece) => {
+            if (piece.color === myColor) {
+              piece.moveable = true;
+            } else {
+              piece.moveable = false;
+            }
+            return piece;
+          }));
+        } else {
+          setGamePieces(gamePieces.map((piece) => {
+            piece.moveable = false;
+            return piece;
+          }));
+        }
+      break;
+      default:
+        setGamePieces(gamePieces.map((piece) => {
+          piece.moveable = false;
+          return piece;
+        }))
+      break;
+    }
     
-  // }, [gameState]);
+  }, [gameState]);
 
   const piecePickUpDropCallback = (piece, pickedUpOrDropped, dropFieldNo=undefined) => {
     // pickedUpOrDropped: true menas picked up, false dropped down
@@ -165,20 +207,20 @@ function App() {
           break;
         case 'StartGame':
           setConnectionState(ConnectionState.IN_GAME);
-          setGameState(GameState.LIGHT_TURN);
           setMyColor(parseInt(tmp[1]));
           setGamePieces(JSON.parse(tmp[2]).map((piece) => {
             return new GamePieceModel(piece.color, piece.type, piece.field_no)
           }));
+          setGameState(GameState.LIGHT_TURN);
           break;
         case 'CurrentState':
           setMyColor(parseInt(tmp[1]));
           // TODO: Set connection state
           setConnectionState(ConnectionState.IN_GAME);
-          setGameState(parseInt(tmp[2]));
           setGamePieces(JSON.parse(tmp[3]).map((piece) => {
             return new GamePieceModel(piece.color, piece.type, piece.field_no)
           }));
+          setGameState(parseInt(tmp[2]));
           showEndGameCardIfNeeded();
           break;
         case 'WrongMove':
