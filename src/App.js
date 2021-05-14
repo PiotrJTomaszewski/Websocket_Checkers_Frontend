@@ -140,13 +140,8 @@ function App() {
 
   return (
     <div>
-      <Header />
+      <Header myColor={myColor} gameState={gameState}/>
       // TODO: Add info about my color
-      {/* <GameBoard
-            piecePickUpDropCallback={piecePickUpDropCallback}
-            pieces={[]}
-            highlightedFields={highlightedFields}
-          /> */}
       <Container>{getMainElement()}</Container>
     </div>
   );
