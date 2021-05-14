@@ -70,7 +70,7 @@ function App() {
     // TODO: Highlight possible moves
     if (pickedUpOrDropped) { // picked up
       setSelectedPiece(piece);
-      setHighlightedFields([piece.fieldNo]);
+      setHighlightedFields(piece.getPossibleMoves(gamePieces));
     } else { // dropped
       setSelectedPiece(null);
       setHighlightedFields([]);
@@ -168,7 +168,6 @@ function App() {
   return (
     <div>
       <Header myColor={myColor} gameState={gameState}/>
-      // TODO: Add info about my color
       <Container>{getMainElement()}</Container>
     </div>
   );
