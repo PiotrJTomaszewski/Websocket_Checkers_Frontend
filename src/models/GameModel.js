@@ -16,6 +16,7 @@ const GameError = {
   NOT_YOUR_TURN: 6,
   NOT_YOUR_PIECE: 7,
   MUST_CAPTURE: 8,
+  MUST_USE_SAME_PIECE: 9,
 };
 
 export { GameState as default, GameError };

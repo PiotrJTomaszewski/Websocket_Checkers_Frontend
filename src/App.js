@@ -308,6 +308,9 @@ function App() {
             case GameError.NOT_YOUR_TURN:
               content += "It's not your turn";
               break;
+            case GameError.MUST_USE_SAME_PIECE:
+              content += "You have to use the same piece as last time";
+              break;
           }
           setInfoMessage({ show: true, type: "danger", content: content });
           break;
