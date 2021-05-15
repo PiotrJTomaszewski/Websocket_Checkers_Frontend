@@ -1,12 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Layer, Shape } from "react-konva";
 
 const GameBoardBackground = (props) => {
   const fieldsInRow = 8;
   const fieldsInCol = 4; // Only 4 usable fields in col
-  const totalFields = fieldsInRow * fieldsInRow;
   const totalUsableFields = fieldsInCol * fieldsInRow;
-  const fieldSize = 1000 / fieldsInRow; // TODO: Don't use hardcoded size
+  const fieldSize = props.dimensions.width / fieldsInRow;
 
   function fieldNoToXY(fieldNo) {
     const col = (totalUsableFields - fieldNo) % fieldsInCol;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Stage, Layer } from "react-konva";
 
 import GameBoardBackground from "./GameBoardBackground";
@@ -16,8 +16,8 @@ const GameBoard = (props) => {
   return (
     <div>
       <h2>{props.name}</h2>
-      <Stage width={1000} height={1000} className="game_board">
-        <GameBoardBackground highlightedFields={props.highlightedFields} />
+      <Stage width={props.dimensions.width} height={props.dimensions.height} >
+        <GameBoardBackground highlightedFields={props.highlightedFields} dimensions={props.dimensions} />
         <Layer ref={layerRef}>
           {props.pieces.map((piece) => {
             return (
@@ -26,6 +26,7 @@ const GameBoard = (props) => {
                 piece={piece}
                 piecePickUpDropCallback={props.piecePickUpDropCallback}
                 redrawParent={redraw}
+                boardDimensions={props.dimensions}
               />
             );
           })}

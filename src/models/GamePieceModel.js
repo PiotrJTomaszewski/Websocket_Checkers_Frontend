@@ -30,9 +30,10 @@ function getPieceColor(row, col, piecesDict) {
 }
 
 class GamePieceModel {
-  constructor(color, type, fieldNo, moveable = false) {
+  constructor(color, type, fieldNo, boardDimensions, moveable = false) {
     this.color = color;
     this.type = type;
+    this.boardDimensions=boardDimensions;
     this.setField(fieldNo);
     this.moveable = moveable;
   }
@@ -41,17 +42,17 @@ class GamePieceModel {
     this.fieldNo = fieldNo;
     if (fieldNo > 0) {
       // Negative fields are used to hide pieces;
-      var fieldSize = 1000 / fieldsInRow; // TODO: Don't use hardcoded value
+      var fieldSize = this.boardDimensions.width / fieldsInRow;
       const col = (totalUsableFields - fieldNo) % fieldsInCol;
       const row = Math.floor((totalUsableFields - fieldNo) / fieldsInCol);
       const xFieldSize = 2 * fieldSize; // There is unused white field between fields in row
       const yFieldSize = fieldSize;
-      this.x = col * xFieldSize + fieldSize / 2;
+      this.x = col * xFieldSize;
       if (row % 2 === 0) {
         // Even rows start with an unused field
         this.x += fieldSize;
       }
-      this.y = row * yFieldSize + fieldSize / 2;
+      this.y = row * yFieldSize;
     } else {
       this.x = -100;
       this.y = -100;

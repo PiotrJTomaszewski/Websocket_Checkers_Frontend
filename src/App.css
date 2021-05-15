@@ -1,7 +1,21 @@
+.navbar {
+    height: 10vh;
+}
+
 .player_piece_img {
     margin-left: 20px;
+    height: 8vh;
 }
 
 .info_box {
     margin-top: 20px;
+}
+
+.konvajs-content {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.konvajs-content canvas {
+    border: 1px solid black !important;
 }

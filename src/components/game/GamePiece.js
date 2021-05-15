@@ -25,6 +25,10 @@ const GamePiece = (props) => {
   }
   const [usedImage] = useImage(image);
   const pieceRef = React.useRef();
+  const fieldsInRow = 8;
+  const fieldsInCol = 4;
+  const totalUsableFields = fieldsInCol * fieldsInRow;
+  const fieldSize = props.boardDimensions.width / fieldsInRow;
 
   useEffect(() => {
     props.piece.resetPositionFunc = resetPosition;
@@ -40,10 +44,6 @@ const GamePiece = (props) => {
     // const canvasTop = canvas.offsetTop + canvas.clientTop;
     const x = e.evt.layerX;
     const y = e.evt.layerY;
-    const fieldsInRow = 8;
-    const fieldsInCol = 4;
-    const totalUsableFields = fieldsInCol * fieldsInRow;
-    const fieldSize = 1000 / fieldsInRow; // TODO: Don't use hardcoded values
     const xFieldSize = 2 * fieldSize; // There is unused white field between fields in a row
     const yFieldSize = fieldSize;
     const dropCol = Math.floor(x / xFieldSize);
@@ -76,6 +76,8 @@ const GamePiece = (props) => {
       onDragEnd={(e) => {
         onDragEndCallback(e);
       }}
+      width={props.boardDimensions.width / fieldsInRow}
+      height={props.boardDimensions.height / fieldsInRow}
     />
   );
 };

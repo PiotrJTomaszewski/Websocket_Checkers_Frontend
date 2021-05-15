@@ -42,9 +42,12 @@ function App() {
   const URL = "ws://localhost:8888/ws";
   const PROTOCOL_NAME = "checkers_game";
   const socket = useRef(null);
+  const [gameBoardDimensions, setGameBoardDimensions] = useState({width: 0, height: 0});
 
   // Runs on start
   useEffect(() => {
+    var smallerDim = window.innerHeight > window.innerWidth ? window.innerWidth : window.innerHeight;
+    setGameBoardDimensions({width: 0.9 * smallerDim, height: 0.9 * smallerDim});
     socket.current = new WebSocket(URL, PROTOCOL_NAME);
     socket.current.onopen = (e) => {
       console.log("Socket open");
@@ -226,7 +229,8 @@ function App() {
               return new GamePieceModel(
                 piece.color,
                 piece.type,
-                piece.field_no
+                piece.field_no,
+                gameBoardDimensions
               );
             })
           );
@@ -241,7 +245,8 @@ function App() {
               return new GamePieceModel(
                 piece.color,
                 piece.type,
-                piece.field_no
+                piece.field_no,
+                gameBoardDimensions
               );
             })
           );
@@ -327,7 +332,7 @@ function App() {
   return (
     <div>
       <Header myColor={myColor} gameState={gameState} />
-      <Container>
+      <Container fluid>
         <div>
           <Loading show={loading.show} text={loading.content} />
           <Modal show={endGameCard.show} onHide={hideEndGameCard}>
@@ -355,6 +360,7 @@ function App() {
             piecePickUpDropCallback={piecePickUpDropCallback}
             pieces={gamePieces}
             highlightedFields={highlightedFields}
+            dimensions={gameBoardDimensions}
           />
         </div>
       </Container>

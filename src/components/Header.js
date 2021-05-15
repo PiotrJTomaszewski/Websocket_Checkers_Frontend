@@ -59,7 +59,7 @@ const Header = (props) => {
   }
 
   return (
-    <Navbar bg="dark" variant="dark">
+    <Navbar bg="dark" variant="dark" className="navbar">
       <Navbar.Brand href="#home">Checkers</Navbar.Brand>
       <Navbar.Collapse className="justify-content-end">
         <Navbar.Text>
