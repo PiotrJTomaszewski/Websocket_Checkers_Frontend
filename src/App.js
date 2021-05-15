@@ -155,6 +155,11 @@ function App() {
     // pickedUpOrDropped: true means picked up, false dropped down
     if (pickedUpOrDropped) {
       // picked up
+      let pieceIndex = gamePieces.indexOf(piece);
+      var piecesCp = gamePieces;
+      piecesCp.splice(pieceIndex, 1);
+      piecesCp.push(piece);
+      setGamePieces(piecesCp);
       setHighlightedFields(piece.getPossibleMoves(gamePieces));
     } else {
       // dropped
