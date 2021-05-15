@@ -24,7 +24,6 @@ function App() {
   );
   const [gameState, setGameState] = useState(GameState.NOT_STARTED);
   const [loading, setLoading] = useState({ show: false, content: "" });
-  const [selectedPiece, setSelectedPiece] = useState(null);
   const [highlightedFields, setHighlightedFields] = useState([]);
   const [gamePieces, setGamePieces] = useState([]);
   const [myColor, setMyColor] = useState(null);
@@ -51,6 +50,9 @@ function App() {
       console.log("Socket open");
       setConnectionState(ConnectionState.CONNECTED);
     };
+    socket.current.onclose = (e) => {
+      setConnectionState(ConnectionState.CONNECTING);
+    }
     return () => {
       console.log("Socket close");
       socket.current.close();
@@ -144,18 +146,19 @@ function App() {
   const piecePickUpDropCallback = (
     piece,
     pickedUpOrDropped,
+    isMoveCorrect,
     dropFieldNo = undefined
   ) => {
     // pickedUpOrDropped: true means picked up, false dropped down
     if (pickedUpOrDropped) {
       // picked up
-      setSelectedPiece(piece);
       setHighlightedFields(piece.getPossibleMoves(gamePieces));
     } else {
       // dropped
-      setSelectedPiece(null);
       setHighlightedFields([]);
-      socket.current.send(`Move;${piece.fieldNo};${dropFieldNo}`);
+      if (isMoveCorrect) {
+        socket.current.send(`Move;${piece.fieldNo};${dropFieldNo}`);
+      }
     }
   };
 
