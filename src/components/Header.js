@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useEffect } from "react";
 import { Navbar } from "react-bootstrap";
 
 import lightPieceImg from "../assets/light_man.png";
@@ -7,64 +7,69 @@ import { GamePieceColor } from "../models/GamePieceModel";
 import GameState from "../models/GameModel";
 
 const Header = (props) => {
-  var image;
-  var gameStateText;
+  const image = useRef(null);
+  const gameStateText = useRef("");
+
+  useEffect(() => {
   switch (props.myColor) {
     case GamePieceColor.LIGHT:
-      image = lightPieceImg;
+      image.current = lightPieceImg;
       break;
     case GamePieceColor.DARK:
-      image = darkPieceImg;
+      image.current = darkPieceImg;
       break;
     default:
-      image = "";
+      image.current = "";
       break;
   }
+  }, [props.myColor]);
 
-  switch (props.gameState) {
-    case GameState.DARK_TURN:
-      if (props.myColor === GamePieceColor.DARK) {
-        gameStateText = "Your turn";
-      } else {
-        gameStateText = "Opponent's turn";
-      }
-      break;
-    case GameState.LIGHT_TURN:
-      if (props.myColor === GamePieceColor.LIGHT) {
-        gameStateText = "Your turn";
-      } else {
-        gameStateText = "Opponent's turn";
-      }
-      break;
-    case GameState.DARK_WON:
-      if (props.myColor === GamePieceColor.DARK) {
-        gameStateText = "You've won";
-      } else {
-        gameStateText = "You've lost";
-      }
-      break;
-    case GameState.LIGHT_WON:
-      if (props.myColor === GamePieceColor.LIGHT) {
-        gameStateText = "You've won";
-      } else {
-        gameStateText = "You've lost";
-      }
-      break;
-    case GameState.TIE:
-      gameStateText = "A tie";
-      break;
-    default:
-      gameStateText = "";
-      break;
-  }
+  useEffect(() => {
+    switch (props.gameState) {
+      case GameState.DARK_TURN:
+        if (props.myColor === GamePieceColor.DARK) {
+          gameStateText.current = "Your turn";
+        } else {
+          gameStateText.current = "Opponent's turn";
+        }
+        break;
+      case GameState.LIGHT_TURN:
+        if (props.myColor === GamePieceColor.LIGHT) {
+          gameStateText.current = "Your turn";
+        } else {
+          gameStateText.current = "Opponent's turn";
+        }
+        break;
+      case GameState.DARK_WON:
+        if (props.myColor === GamePieceColor.DARK) {
+          gameStateText.current = "You've won";
+        } else {
+          gameStateText.current = "You've lost";
+        }
+        break;
+      case GameState.LIGHT_WON:
+        if (props.myColor === GamePieceColor.LIGHT) {
+          gameStateText.current = "You've won";
+        } else {
+          gameStateText.current = "You've lost";
+        }
+        break;
+      case GameState.TIE:
+        gameStateText.current = "A tie";
+        break;
+      default:
+        gameStateText.current = "";
+        break;
+    }
+  }, [props.gameState, props.myColor]);
 
   return (
     <Navbar bg="dark" variant="dark" className="navbar">
       <Navbar.Brand href="#home">Checkers</Navbar.Brand>
       <Navbar.Collapse className="justify-content-end">
         <Navbar.Text>
-          {gameStateText}
-          <img className="player_piece_img" src={image} />
+          {gameStateText.current}
+          <img className="player_piece_img" src={image.current} alt={props.myColor === GamePieceColor.DARK ? "dark" : "light"}/>
         </Navbar.Text>
       </Navbar.Collapse>
     </Navbar>

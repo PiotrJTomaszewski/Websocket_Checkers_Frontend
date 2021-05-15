@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Stage, Layer } from "react-konva";
 
 import GameBoardBackground from "./GameBoardBackground";
 import GamePiece from "./GamePiece";
-import GamePieceModel from "../../models/GamePieceModel";
 
-// TODO: Rotate the board
 const GameBoard = (props) => {
   const layerRef = React.useRef();
 

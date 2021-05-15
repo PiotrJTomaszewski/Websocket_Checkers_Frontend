@@ -26,23 +26,23 @@ function App() {
   const [loading, setLoading] = useState({ show: false, content: "" });
   const [highlightedFields, setHighlightedFields] = useState([]);
   const [gamePieces, setGamePieces] = useState([]);
-  const [myColor, setMyColor] = useState(null);
-  const [nextNegativeField, setNextNegativeField] = useState(-1);
-  const [endGameCard, setEndGameCard] = useState({
-    show: false,
-    title: "",
-    content: "",
-  });
   const [infoMessage, setInfoMessage] = useState({
     show: false,
     type: "",
     content: "",
   });
+  const [endGameCard, setEndGameCard] = useState({
+    show: false,
+    title: "",
+    content: "",
+  });
+  const [gameBoardDimensions, setGameBoardDimensions] = useState({width: 0, height: 0});
 
   const URL = "ws://localhost:8888/ws";
   const PROTOCOL_NAME = "checkers_game";
   const socket = useRef(null);
-  const [gameBoardDimensions, setGameBoardDimensions] = useState({width: 0, height: 0});
+  const myColor = useRef(null);
+  const nextNegativeField = useRef(-1);
 
   // Runs on start
   useEffect(() => {
@@ -94,10 +94,9 @@ function App() {
   useEffect(() => {
     switch (gameState) {
       case GameState.LIGHT_TURN:
-        if (myColor === GamePieceColor.LIGHT) {
-          setGamePieces(
-            gamePieces.map((piece) => {
-              if (piece.color === myColor) {
+        if (myColor.current === GamePieceColor.LIGHT) {
+          setGamePieces(g => g.map((piece) => {
+              if (piece.color === myColor.current) {
                 piece.moveable = true;
               } else {
                 piece.moveable = false;
@@ -106,8 +105,7 @@ function App() {
             })
           );
         } else {
-          setGamePieces(
-            gamePieces.map((piece) => {
+          setGamePieces(g => g.map((piece) => {
               piece.moveable = false;
               return piece;
             })
@@ -115,10 +113,9 @@ function App() {
         }
         break;
       case GameState.DARK_TURN:
-        if (myColor === GamePieceColor.DARK) {
-          setGamePieces(
-            gamePieces.map((piece) => {
-              if (piece.color === myColor) {
+        if (myColor.current === GamePieceColor.DARK) {
+          setGamePieces(g => g.map((piece) => {
+              if (piece.color === myColor.current) {
                 piece.moveable = true;
               } else {
                 piece.moveable = false;
@@ -127,8 +124,7 @@ function App() {
             })
           );
         } else {
-          setGamePieces(
-            gamePieces.map((piece) => {
+          setGamePieces(g => g.map((piece) => {
               piece.moveable = false;
               return piece;
             })
@@ -136,8 +132,7 @@ function App() {
         }
         break;
       default:
-        setGamePieces(
-          gamePieces.map((piece) => {
+        setGamePieces(g => g.map((piece) => {
             piece.moveable = false;
             return piece;
           })
@@ -170,17 +165,14 @@ function App() {
     }
   };
 
-  const hideEndGameCard = () => {
-    setEndGameCard({ ...endGameCard, show: false });
-  };
-
-  const showEndGameCardIfNeeded = () => {
+  // On game state change, display end game card
+  useEffect(() => {
     var title;
     var content;
     switch (gameState) {
       case GameState.DARK_WON:
         title = "Dark player has won!";
-        if (myColor == GamePieceColor.DARK) {
+        if (myColor.current === GamePieceColor.DARK) {
           content = "Congratulations, you've won the game!";
         } else {
           content = "Unfortunatelly, you've lost the game";
@@ -189,7 +181,7 @@ function App() {
         break;
       case GameState.LIGHT_WON:
         title = "Light player has won!";
-        if (myColor == GamePieceColor.LIGHT) {
+        if (myColor.current === GamePieceColor.LIGHT) {
           content = "Congratulations, you've won the game!";
         } else {
           content = "Unfortunatelly, you've lost the game";
@@ -202,8 +194,10 @@ function App() {
           "Neither you nor your opponent can make any move, it's a tie!";
         setEndGameCard({ show: true, title: title, content: content });
         break;
+      default:
+        break;
     }
-  };
+  }, [gameState]);
 
   // Receiving messages
   useEffect(() => {
@@ -228,13 +222,13 @@ function App() {
           break;
         case "StartGame":
           setConnectionState(ConnectionState.IN_GAME);
-          setMyColor(parseInt(tmp[1]));
+          myColor.current = parseInt(tmp[1]);
           setGamePieces(
             JSON.parse(tmp[2]).map((piece) => {
               return new GamePieceModel(
                 piece.color,
                 piece.type,
-                piece.field_no,
+                piece.field_no, 
                 gameBoardDimensions
               );
             })
@@ -242,9 +236,9 @@ function App() {
           setGameState(GameState.LIGHT_TURN);
           break;
         case "CurrentState":
-          setMyColor(parseInt(tmp[1]));
+          myColor.current = parseInt(tmp[1]);
           // TODO: Set connection state
-          setConnectionState(ConnectionState.IN_GAME);
+          setConnectionState(ConnectionState.IN_GAME);  
           setGamePieces(
             JSON.parse(tmp[3]).map((piece) => {
               return new GamePieceModel(
@@ -255,8 +249,8 @@ function App() {
               );
             })
           );
+          setHighlightedFields([]);
           setGameState(parseInt(tmp[2]));
-          showEndGameCardIfNeeded();
           break;
         case "WrongMove":
           fieldNo = parseInt(tmp[1]);
@@ -293,6 +287,8 @@ function App() {
             case GameError.MUST_USE_SAME_PIECE:
               content += "You have to use the same piece as last time";
               break;
+            default:
+              break;
           }
           setInfoMessage({ show: true, type: "danger", content: content });
           break;
@@ -311,14 +307,11 @@ function App() {
                 }
               }
               if (piece.fieldNo === capturedFieldNo) {
-                piece.setField(nextNegativeField);
+                piece.setField(nextNegativeField.current--);
               }
               return piece;
             })
           );
-          if (capturedFieldNo) {
-            setNextNegativeField(nextNegativeField - 1);
-          }
           if (endTurn) {
             setGameState(
               gameState === GameState.LIGHT_TURN
@@ -329,24 +322,26 @@ function App() {
           break;
         case "GameEnd":
           setGameState(parseInt(tmp[1]));
-          showEndGameCardIfNeeded();
+          break;
+        default:
+          break;
       }
     };
   });
 
   return (
     <div>
-      <Header myColor={myColor} gameState={gameState} />
+      <Header myColor={myColor.current} gameState={gameState} />
       <Container fluid>
         <div>
           <Loading show={loading.show} text={loading.content} />
-          <Modal show={endGameCard.show} onHide={hideEndGameCard}>
+          <Modal show={endGameCard.show} onHide={() => {setEndGameCard({...endGameCard, show: false})}}>
             <Modal.Header closeButton>
               <Modal.Title>{endGameCard.title}</Modal.Title>
             </Modal.Header>
             <Modal.Body>{endGameCard.content}</Modal.Body>
             <Modal.Footer>
-              <Button variant="primary" onClick={hideEndGameCard}>
+              <Button variant="primary" onClick={() => {setEndGameCard({...endGameCard, show: false})}}>
                 Close
               </Button>
             </Modal.Footer>
@@ -372,7 +367,5 @@ function App() {
     </div>
   );
 }
-
-// TODO: Handle reconnections
 
 export default App;
