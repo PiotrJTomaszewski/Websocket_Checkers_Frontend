@@ -3,6 +3,7 @@ import { Navbar } from "react-bootstrap";
 
 import lightPieceImg from "../assets/light_man.png";
 import darkPieceImg from "../assets/dark_man.png";
+import mixedPieceImg from "../assets/mixed_king.png";
 import { GamePieceColor } from "../models/GamePieceModel";
 import GameState from "../models/GameModel";
 
@@ -19,13 +20,16 @@ const Header = (props) => {
       image.current = darkPieceImg;
       break;
     default:
-      image.current = "";
+      image.current = mixedPieceImg;
       break;
   }
   }, [props.myColor]);
 
   useEffect(() => {
     switch (props.gameState) {
+      case GameState.NOT_STARTED:
+        gameStateText.current = "";
+        break;
       case GameState.DARK_TURN:
         if (props.myColor === GamePieceColor.DARK) {
           gameStateText.current = "Your turn";
@@ -65,7 +69,7 @@ const Header = (props) => {
 
   return (
     <Navbar bg="dark" variant="dark" className="navbar">
-      <Navbar.Brand href="#home">Checkers</Navbar.Brand>
+      <Navbar.Brand href="#"><img className="logo" src={mixedPieceImg} alt={"Logo"} /> Checkers</Navbar.Brand>
       <Navbar.Collapse className="justify-content-end">
         <Navbar.Text>
           {gameStateText.current}
