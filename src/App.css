@@ -1,10 +1,10 @@
 .navbar {
-    height: 10vh;
+    height: 60px;
 }
 
 .player_piece_img {
     margin-left: 20px;
-    height: 8vh;
+    height: 55px;
 }
 
 .info_box {

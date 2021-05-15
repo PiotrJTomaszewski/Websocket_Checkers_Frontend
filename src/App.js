@@ -46,7 +46,7 @@ function App() {
 
   // Runs on start
   useEffect(() => {
-    var smallerDim = window.innerHeight > window.innerWidth ? window.innerWidth : window.innerHeight;
+    var smallerDim = (window.innerHeight-60) > window.innerWidth ? window.innerWidth : (window.innerHeight-60);
     setGameBoardDimensions({width: 0.9 * smallerDim, height: 0.9 * smallerDim});
     socket.current = new WebSocket(URL, PROTOCOL_NAME);
     socket.current.onopen = (e) => {
