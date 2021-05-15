@@ -204,6 +204,7 @@ function App() {
     socket.current.onmessage = (e) => {
       console.log("Server said: ", e.data);
       const tmp = e.data.split(";");
+      var pieces;
       var piece;
       var fieldNo;
       var targetFieldNo;
@@ -223,16 +224,12 @@ function App() {
         case "StartGame":
           setConnectionState(ConnectionState.IN_GAME);
           myColor.current = parseInt(tmp[1]);
-          setGamePieces(
-            JSON.parse(tmp[2]).map((piece) => {
-              return new GamePieceModel(
-                piece.color,
-                piece.type,
-                piece.field_no, 
-                gameBoardDimensions
-              );
-            })
-          );
+          pieces = [];
+          for (let i=1; i<=12; i++) {
+            pieces[i] = new GamePieceModel(GamePieceColor.DARK, GamePieceType.MAN, i, gameBoardDimensions);
+            pieces[i+20] = new GamePieceModel(GamePieceColor.LIGHT, GamePieceType.MAN, i+20, gameBoardDimensions);
+          }
+          setGamePieces(pieces);
           setGameState(GameState.LIGHT_TURN);
           break;
         case "CurrentState":
