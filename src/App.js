@@ -10,6 +10,7 @@ import GamePieceModel, {
   GamePieceColor,
   GamePieceType,
 } from "./models/GamePieceModel";
+import MessageType, { decodeMessage, encodeMessage } from "./models/MessageModel";
 
 const ConnectionState = {
   CONNECTING: 0,
@@ -49,6 +50,7 @@ function App() {
     var smallerDim = (window.innerHeight-60) > window.innerWidth ? window.innerWidth : (window.innerHeight-60);
     setGameBoardDimensions({width: 0.9 * smallerDim, height: 0.9 * smallerDim});
     socket.current = new WebSocket(URL, PROTOCOL_NAME);
+    socket.current.binaryType = 'arraybuffer';
     socket.current.onopen = (e) => {
       console.log("Socket open");
       setConnectionState(ConnectionState.CONNECTED);
@@ -73,10 +75,10 @@ function App() {
         playerUUID = localStorage.getItem("UUID");
         if (playerUUID === null) {
           console.log("Sent:", "JoinNew");
-          socket.current.send("JoinNew");
+          socket.current.send(encodeMessage(MessageType.JOIN_NEW));
         } else {
           console.log("Sent:", `JoinExisting;${playerUUID}`);
-          socket.current.send(`JoinExisting;${playerUUID}`);
+          socket.current.send(encodeMessage(MessageType.JOIN_EXISTING, {uuid: playerUUID}));
         }
         setLoading({show: true, content: "Joining a game room, please wait"});
         break;
@@ -160,7 +162,8 @@ function App() {
       // dropped
       setHighlightedFields([]);
       if (isMoveCorrect) {
-        socket.current.send(`Move;${piece.fieldNo};${dropFieldNo}`);
+        console.log(`Move;${piece.fieldNo};${dropFieldNo}`);
+        socket.current.send(encodeMessage(MessageType.MOVE, {from: piece.fieldNo, to: dropFieldNo}));
       }
     }
   };
@@ -202,29 +205,20 @@ function App() {
   // Receiving messages
   useEffect(() => {
     socket.current.onmessage = (e) => {
-      console.log("Server said: ", e.data);
-      const tmp = e.data.split(";");
-      var pieces;
-      var piece;
-      var fieldNo;
-      var targetFieldNo;
-      var capturedFieldNo;
-      var promote;
-      var endTurn;
-      var errorCode;
-      var content;
-      switch (tmp[0]) {
-        case "Welcome":
+      const decodedMessage = decodeMessage(e.data);
+      console.log("Message received:", decodedMessage);
+      switch (decodedMessage.type) {
+        case MessageType.WELCOME:
           setConnectionState(ConnectionState.LOOKING_FOR_OPPONENT);
           break;
-        case "WelcomeNew":
-          localStorage.setItem("UUID", tmp[1]);
+        case MessageType.WELCOME_NEW:
+          localStorage.setItem("UUID", decodedMessage.uuid);
           setConnectionState(ConnectionState.LOOKING_FOR_OPPONENT);
           break;
-        case "StartGame":
+        case MessageType.START_GAME:
           setConnectionState(ConnectionState.IN_GAME);
-          myColor.current = parseInt(tmp[1]);
-          pieces = [];
+          myColor.current = decodedMessage.color;
+          let pieces = [];
           for (let i=1; i<=12; i++) {
             pieces[i] = new GamePieceModel(GamePieceColor.DARK, GamePieceType.MAN, i, gameBoardDimensions);
             pieces[i+20] = new GamePieceModel(GamePieceColor.LIGHT, GamePieceType.MAN, i+20, gameBoardDimensions);
@@ -232,32 +226,30 @@ function App() {
           setGamePieces(pieces);
           setGameState(GameState.LIGHT_TURN);
           break;
-        case "CurrentState":
-          myColor.current = parseInt(tmp[1]);
+        case MessageType.CURRENT_STATE:
+          myColor.current = decodedMessage.color;
           // TODO: Set connection state
           setConnectionState(ConnectionState.IN_GAME);  
           setGamePieces(
-            JSON.parse(tmp[3]).map((piece) => {
+            decodedMessage.pieces.map((piece) => {
               return new GamePieceModel(
                 piece.color,
                 piece.type,
-                piece.field_no,
+                piece.fieldNo,
                 gameBoardDimensions
               );
             })
           );
           setHighlightedFields([]);
-          setGameState(parseInt(tmp[2]));
+          setGameState(decodedMessage.gameState);
           break;
-        case "WrongMove":
-          fieldNo = parseInt(tmp[1]);
-          errorCode = parseInt(tmp[2]);
-          piece = gamePieces.filter(function (piece) {
-            return piece.fieldNo === fieldNo;
-          })[0];
+        case MessageType.WRONG_MOVE:
+          let piece = gamePieces.find(function (piece) {
+            return piece.fieldNo === decodedMessage.from;
+          });
           piece.resetPositionFunc();
-          content = "Wrong move! ";
-          switch (errorCode) {
+          let content = "Wrong move! ";
+          switch (decodedMessage.error) {
             case GameError.CANT_MOVE_PIECE:
               content += "The piece cannot move to the chosen field";
               break;
@@ -289,27 +281,22 @@ function App() {
           }
           setInfoMessage({ show: true, type: "danger", content: content });
           break;
-        case "Move":
-          fieldNo = parseInt(tmp[1]);
-          targetFieldNo = parseInt(tmp[2]);
-          endTurn = tmp[3] === "True";
-          promote = tmp[4] === "True";
-          capturedFieldNo = parseInt(tmp[5]);
+        case MessageType.MOVE_OK:
           setGamePieces(
             gamePieces.map((piece) => {
-              if (piece.fieldNo === fieldNo) {
-                piece.setField(targetFieldNo);
-                if (promote) {
+              if (piece.fieldNo === decodedMessage.from) {
+                piece.setField(decodedMessage.to);
+                if (decodedMessage.promote) {
                   piece.type = GamePieceType.KING;
                 }
               }
-              if (piece.fieldNo === capturedFieldNo) {
+              if (piece.fieldNo === decodedMessage.capturedFieldNo) {
                 piece.setField(nextNegativeField.current--);
               }
               return piece;
             })
           );
-          if (endTurn) {
+          if (decodedMessage.endTurn) {
             setGameState(
               gameState === GameState.LIGHT_TURN
                 ? GameState.DARK_TURN
@@ -317,8 +304,8 @@ function App() {
             );
           }
           break;
-        case "GameEnd":
-          setGameState(parseInt(tmp[1]));
+        case MessageType.GAME_END:
+          setGameState(decodedMessage.gameState);
           break;
         default:
           break;
