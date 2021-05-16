@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Container, Modal, Button, Alert } from "react-bootstrap";
+import { Container, Modal, Button, Alert} from "react-bootstrap";
+import { withOneTabEnforcer } from "react-one-tab-enforcer";
 
 import "./App.css";
 import Loading from "./components/Loading";
@@ -18,6 +19,14 @@ const ConnectionState = {
   LOOKING_FOR_OPPONENT: 2,
   IN_GAME: 3,
 };
+
+const OneTabWarningComponent = () => {
+  return(
+    <Container>
+        <h1  className="one_tab_warning">Sorry! You can only have this application opened in one tab</h1>
+    </Container>
+  );
+}
 
 function App() {
   const [connectionState, setConnectionState] = useState(
@@ -352,4 +361,4 @@ function App() {
   );
 }
 
-export default App;
+export default withOneTabEnforcer({appName: "checkersGameWebsocket", OnlyOneTabComponent: OneTabWarningComponent})(App);
