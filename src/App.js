@@ -253,9 +253,9 @@ function App() {
           setGameState(decodedMessage.gameState);
           break;
         case MessageType.WRONG_MOVE:
-          let piece = gamePieces.find(function (piece) {
+          let piece = gamePieces.filter(function (piece) {
             return piece.fieldNo === decodedMessage.from;
-          });
+          })[0];
           piece.resetPositionFunc();
           let content = "Wrong move! ";
           switch (decodedMessage.error) {
