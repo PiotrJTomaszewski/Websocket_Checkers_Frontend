@@ -54,8 +54,8 @@ class GamePieceModel {
       }
       this.y = row * yFieldSize;
     } else {
-      this.x = -100;
-      this.y = -100;
+      this.x = -10000;
+      this.y = -10000;
     }
   }
 
