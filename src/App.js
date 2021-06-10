@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Container, Modal, Button, Alert} from "react-bootstrap";
+import { Container, Modal, Button, Alert } from "react-bootstrap";
 import { withOneTabEnforcer } from "react-one-tab-enforcer";
 
 import "./App.css";
@@ -11,7 +11,10 @@ import GamePieceModel, {
   GamePieceColor,
   GamePieceType,
 } from "./models/GamePieceModel";
-import MessageType, { decodeMessage, encodeMessage } from "./models/MessageModel";
+import MessageType, {
+  decodeMessage,
+  encodeMessage,
+} from "./models/MessageModel";
 
 const ConnectionState = {
   CONNECTING: 0,
@@ -21,12 +24,14 @@ const ConnectionState = {
 };
 
 const OneTabWarningComponent = () => {
-  return(
+  return (
     <Container>
-        <h1  className="one_tab_warning">Sorry! You can only have this application opened in one tab</h1>
+      <h1 className="one_tab_warning">
+        Sorry! You can only have this application opened in one tab
+      </h1>
     </Container>
   );
-}
+};
 
 function App() {
   const [connectionState, setConnectionState] = useState(
@@ -46,7 +51,10 @@ function App() {
     title: "",
     content: "",
   });
-  const [gameBoardDimensions, setGameBoardDimensions] = useState({width: 0, height: 0});
+  const [gameBoardDimensions, setGameBoardDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
 
   const URL = "ws://localhost:8888/ws";
   // const URL = "ws://139.162.151.182:8888/ws";
@@ -57,17 +65,23 @@ function App() {
 
   // Runs on start
   useEffect(() => {
-    var smallerDim = (window.innerHeight-60) > window.innerWidth ? window.innerWidth : (window.innerHeight-60);
-    setGameBoardDimensions({width: 0.9 * smallerDim, height: 0.9 * smallerDim});
+    var smallerDim =
+      window.innerHeight - 60 > window.innerWidth
+        ? window.innerWidth
+        : window.innerHeight - 60;
+    setGameBoardDimensions({
+      width: 0.9 * smallerDim,
+      height: 0.9 * smallerDim,
+    });
     socket.current = new WebSocket(URL, PROTOCOL_NAME);
-    socket.current.binaryType = 'arraybuffer';
+    socket.current.binaryType = "arraybuffer";
     socket.current.onopen = (e) => {
       console.log("Socket open");
       setConnectionState(ConnectionState.CONNECTED);
     };
     socket.current.onclose = (e) => {
       setConnectionState(ConnectionState.CONNECTING);
-    }
+    };
     return () => {
       console.log("Socket close");
       socket.current.close();
@@ -79,7 +93,10 @@ function App() {
     var playerUUID;
     switch (connectionState) {
       case ConnectionState.CONNECTING:
-        setLoading({show: true, content: "Connecting to server, please wait"});
+        setLoading({
+          show: true,
+          content: "Connecting to server, please wait",
+        });
         break;
       case ConnectionState.CONNECTED:
         playerUUID = localStorage.getItem("UUID");
@@ -88,16 +105,21 @@ function App() {
           socket.current.send(encodeMessage(MessageType.JOIN_NEW));
         } else {
           console.log("Sent:", `JoinExisting;${playerUUID}`);
-          socket.current.send(encodeMessage(MessageType.JOIN_EXISTING, {uuid: playerUUID}));
+          socket.current.send(
+            encodeMessage(MessageType.JOIN_EXISTING, { uuid: playerUUID })
+          );
         }
-        setLoading({show: true, content: "Joining a game room, please wait"});
+        setLoading({ show: true, content: "Joining a game room, please wait" });
         break;
-        case ConnectionState.LOOKING_FOR_OPPONENT:
-          setLoading({show: true, content: "Looking for an opponent, please wait"});
-          break;
-        default:
-          setLoading({show: false});
-          break;
+      case ConnectionState.LOOKING_FOR_OPPONENT:
+        setLoading({
+          show: true,
+          content: "Looking for an opponent, please wait",
+        });
+        break;
+      default:
+        setLoading({ show: false });
+        break;
     }
     console.log("New connection state:", connectionState);
   }, [connectionState]);
@@ -107,7 +129,8 @@ function App() {
     switch (gameState) {
       case GameState.LIGHT_TURN:
         if (myColor.current === GamePieceColor.LIGHT) {
-          setGamePieces(g => g.map((piece) => {
+          setGamePieces((g) =>
+            g.map((piece) => {
               if (piece.color === myColor.current) {
                 piece.moveable = true;
               } else {
@@ -117,7 +140,8 @@ function App() {
             })
           );
         } else {
-          setGamePieces(g => g.map((piece) => {
+          setGamePieces((g) =>
+            g.map((piece) => {
               piece.moveable = false;
               return piece;
             })
@@ -126,7 +150,8 @@ function App() {
         break;
       case GameState.DARK_TURN:
         if (myColor.current === GamePieceColor.DARK) {
-          setGamePieces(g => g.map((piece) => {
+          setGamePieces((g) =>
+            g.map((piece) => {
               if (piece.color === myColor.current) {
                 piece.moveable = true;
               } else {
@@ -136,7 +161,8 @@ function App() {
             })
           );
         } else {
-          setGamePieces(g => g.map((piece) => {
+          setGamePieces((g) =>
+            g.map((piece) => {
               piece.moveable = false;
               return piece;
             })
@@ -144,7 +170,8 @@ function App() {
         }
         break;
       default:
-        setGamePieces(g => g.map((piece) => {
+        setGamePieces((g) =>
+          g.map((piece) => {
             piece.moveable = false;
             return piece;
           })
@@ -173,7 +200,12 @@ function App() {
       setHighlightedFields([]);
       if (isMoveCorrect) {
         console.log(`Move;${piece.fieldNo};${dropFieldNo}`);
-        socket.current.send(encodeMessage(MessageType.MOVE, {from: piece.fieldNo, to: dropFieldNo}));
+        socket.current.send(
+          encodeMessage(MessageType.MOVE, {
+            from: piece.fieldNo,
+            to: dropFieldNo,
+          })
+        );
       }
     }
   };
@@ -229,17 +261,26 @@ function App() {
           setConnectionState(ConnectionState.IN_GAME);
           myColor.current = decodedMessage.color;
           let pieces = [];
-          for (let i=1; i<=12; i++) {
-            pieces[i] = new GamePieceModel(GamePieceColor.DARK, GamePieceType.MAN, i, gameBoardDimensions);
-            pieces[i+20] = new GamePieceModel(GamePieceColor.LIGHT, GamePieceType.MAN, i+20, gameBoardDimensions);
+          for (let i = 1; i <= 12; i++) {
+            pieces[i] = new GamePieceModel(
+              GamePieceColor.DARK,
+              GamePieceType.MAN,
+              i,
+              gameBoardDimensions
+            );
+            pieces[i + 20] = new GamePieceModel(
+              GamePieceColor.LIGHT,
+              GamePieceType.MAN,
+              i + 20,
+              gameBoardDimensions
+            );
           }
           setGamePieces(pieces);
           setGameState(GameState.LIGHT_TURN);
           break;
         case MessageType.CURRENT_STATE:
           myColor.current = decodedMessage.color;
-          // TODO: Set connection state
-          setConnectionState(ConnectionState.IN_GAME);  
+          setConnectionState(ConnectionState.IN_GAME);
           setGamePieces(
             decodedMessage.pieces.map((piece) => {
               return new GamePieceModel(
@@ -329,13 +370,23 @@ function App() {
       <Container fluid>
         <div>
           <Loading show={loading.show} text={loading.content} />
-          <Modal show={endGameCard.show} onHide={() => {setEndGameCard({...endGameCard, show: false})}}>
+          <Modal
+            show={endGameCard.show}
+            onHide={() => {
+              setEndGameCard({ ...endGameCard, show: false });
+            }}
+          >
             <Modal.Header closeButton>
               <Modal.Title>{endGameCard.title}</Modal.Title>
             </Modal.Header>
             <Modal.Body>{endGameCard.content}</Modal.Body>
             <Modal.Footer>
-              <Button variant="primary" onClick={() => {setEndGameCard({...endGameCard, show: false})}}>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setEndGameCard({ ...endGameCard, show: false });
+                }}
+              >
                 Close
               </Button>
             </Modal.Footer>
@@ -362,4 +413,7 @@ function App() {
   );
 }
 
-export default withOneTabEnforcer({appName: "checkersGameWebsocket", OnlyOneTabComponent: OneTabWarningComponent})(App);
+export default withOneTabEnforcer({
+  appName: "checkersGameWebsocket",
+  OnlyOneTabComponent: OneTabWarningComponent,
+})(App);

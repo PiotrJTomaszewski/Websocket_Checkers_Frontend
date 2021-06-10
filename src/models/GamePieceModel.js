@@ -33,7 +33,7 @@ class GamePieceModel {
   constructor(color, type, fieldNo, boardDimensions, moveable = false) {
     this.color = color;
     this.type = type;
-    this.boardDimensions=boardDimensions;
+    this.boardDimensions = boardDimensions;
     this.setField(fieldNo);
     this.moveable = moveable;
   }

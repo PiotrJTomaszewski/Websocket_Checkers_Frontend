@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Layer, Shape } from "react-konva";
 
 const GameBoardBackground = (props) => {
-  const [mainElement, setMainElement] = useState(<Shape/>);
+  const [mainElement, setMainElement] = useState(<Shape />);
 
   // On highlightedFields change
   useEffect(() => {
@@ -24,7 +24,7 @@ const GameBoardBackground = (props) => {
       let y = row * yFieldSize;
       return { x: x, y: y };
     }
-  
+
     function colorizeFields(ctx) {
       // Color usable fields
       ctx.fillStyle = "#0F0";
@@ -33,7 +33,7 @@ const GameBoardBackground = (props) => {
         ctx.fillRect(xy.x, xy.y, fieldSize, fieldSize);
       }
     }
-  
+
     function drawBoard(ctx) {
       ctx.fillStyle = "#000";
       // Draw lines
@@ -45,7 +45,7 @@ const GameBoardBackground = (props) => {
         ctx.lineTo(ctx.canvas.width, i * fieldSize);
         ctx.stroke();
       }
-  
+
       // Put field numbers
       for (let i = 1; i <= totalUsableFields; i++) {
         let xy = fieldNoToXY(i);
@@ -54,7 +54,7 @@ const GameBoardBackground = (props) => {
         ctx.fillText(i, x, y);
       }
     }
-  
+
     function highlightFields(ctx) {
       ctx.save();
       ctx.fillStyle = "#FF0";

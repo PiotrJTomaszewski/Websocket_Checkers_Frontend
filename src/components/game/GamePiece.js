@@ -48,7 +48,10 @@ const GamePiece = (props) => {
     var newFieldNo = totalUsableFields - dropCol - fieldsInCol * dropRow;
     // Check whether the piece was dropped on a dark or a white field
     const dropColFullBoard = Math.floor(x / fieldSize);
-    if (dropRow % 2 !== dropColFullBoard % 2 && props.piece.fieldNo !== newFieldNo) {
+    if (
+      dropRow % 2 !== dropColFullBoard % 2 &&
+      props.piece.fieldNo !== newFieldNo
+    ) {
       console.log("Dropped on:", newFieldNo);
       props.piecePickUpDropCallback(props.piece, false, true, newFieldNo);
     } else {

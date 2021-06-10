@@ -12,17 +12,17 @@ const Header = (props) => {
   const gameStateText = useRef("");
 
   useEffect(() => {
-  switch (props.myColor) {
-    case GamePieceColor.LIGHT:
-      image.current = lightPieceImg;
-      break;
-    case GamePieceColor.DARK:
-      image.current = darkPieceImg;
-      break;
-    default:
-      image.current = mixedPieceImg;
-      break;
-  }
+    switch (props.myColor) {
+      case GamePieceColor.LIGHT:
+        image.current = lightPieceImg;
+        break;
+      case GamePieceColor.DARK:
+        image.current = darkPieceImg;
+        break;
+      default:
+        image.current = mixedPieceImg;
+        break;
+    }
   }, [props.myColor]);
 
   useEffect(() => {
@@ -69,11 +69,17 @@ const Header = (props) => {
 
   return (
     <Navbar bg="dark" variant="dark" className="navbar">
-      <Navbar.Brand href="#"><img className="logo" src={mixedPieceImg} alt={"Logo"} /> Checkers</Navbar.Brand>
+      <Navbar.Brand href="#">
+        <img className="logo" src={mixedPieceImg} alt={"Logo"} /> Checkers
+      </Navbar.Brand>
       <Navbar.Collapse className="justify-content-end">
         <Navbar.Text>
           {gameStateText.current}
-          <img className="player_piece_img" src={image.current} alt={props.myColor === GamePieceColor.DARK ? "dark" : "light"}/>
+          <img
+            className="player_piece_img"
+            src={image.current}
+            alt={props.myColor === GamePieceColor.DARK ? "dark" : "light"}
+          />
         </Navbar.Text>
       </Navbar.Collapse>
     </Navbar>

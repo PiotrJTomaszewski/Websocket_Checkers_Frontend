@@ -14,8 +14,11 @@ const GameBoard = (props) => {
   return (
     <div>
       <h2>{props.name}</h2>
-      <Stage width={props.dimensions.width} height={props.dimensions.height} >
-        <GameBoardBackground highlightedFields={props.highlightedFields} dimensions={props.dimensions} />
+      <Stage width={props.dimensions.width} height={props.dimensions.height}>
+        <GameBoardBackground
+          highlightedFields={props.highlightedFields}
+          dimensions={props.dimensions}
+        />
         <Layer ref={layerRef}>
           {props.pieces.map((piece) => {
             return (

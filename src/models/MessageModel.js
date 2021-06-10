@@ -5,7 +5,7 @@ const MessageType = {
   WELCOME: 4,
   WELCOME_NEW: 5, // + uuid (32 bytes),
   START_GAME: 6, // + player color (1 byte),
-  CURRENT_STATE: 7, // + color (1 byte) + game state (1 byte) + pieces (up to 24 bytes),
+  CURRENT_STATE: 7, // + player color (1 byte) + game state (1 byte) + pieces (up to 24 bytes),
   WRONG_MOVE: 8, // + from (1 byte) + error code (1 byte),
   MOVE_OK: 9, // + from (1 byte) + to (1 byte) + end turn (1 byte) + promote (1 byte) + captured field number (1 byte),
   GAME_END: 10, // + game state (1 byte),
@@ -62,12 +62,12 @@ function decodeMessage(binaryData) {
       break;
     case MessageType.CURRENT_STATE:
       let pieces = [];
-      for (let i = 0; i < binaryData.byteLength; i++) {
+      for (let i = 3; i < binaryData.byteLength; i++) {
         let pieceData = dataView.getUint8(i);
         pieces.push({
           color: ((pieceData & 0x40) >> 6) + 1,
           type: ((pieceData & 0x80) >> 7) + 1,
-          fieldNo: pieceData & (0x3F),
+          fieldNo: pieceData & 0x3f,
         });
       }
       decoded = {
@@ -96,10 +96,10 @@ function decodeMessage(binaryData) {
       break;
     case MessageType.GAME_END:
       decoded = {
-          type: MessageType.GAME_END,
-          gameState: dataView.getUint8(1),
+        type: MessageType.GAME_END,
+        gameState: dataView.getUint8(1),
       };
-    break;
+      break;
     default:
       break;
   }

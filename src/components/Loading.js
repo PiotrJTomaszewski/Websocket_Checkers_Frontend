@@ -10,7 +10,7 @@ const Loading = (props) => {
       </div>
     );
   } else {
-    return <div></div>
+    return <div></div>;
   }
 };
 
