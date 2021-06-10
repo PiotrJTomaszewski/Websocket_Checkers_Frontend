@@ -2,7 +2,7 @@
   "name": "checkers_frontend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://PiotrJTomaszewski.github.io/checkers",
+  "homepage": "https://checkers.tomaszewski.xyz",
   "dependencies": {
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/react": "^11.2.6",
