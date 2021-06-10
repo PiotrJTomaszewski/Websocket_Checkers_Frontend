@@ -56,8 +56,8 @@ function App() {
     height: 0,
   });
 
-  const URL = "ws://localhost:8888/ws";
-  // const URL = "ws://139.162.151.182:8888/ws";
+  // const URL = "ws://localhost:8888/ws";
+  const URL = "wss://node.tomaszewski.xyz/ws";
   const PROTOCOL_NAME = "checkers_game";
   const socket = useRef(null);
   const myColor = useRef(null);
