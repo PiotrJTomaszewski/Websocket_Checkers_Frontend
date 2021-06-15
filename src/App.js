@@ -6,7 +6,7 @@ import "./App.css";
 import Loading from "./components/Loading";
 import Header from "./components/Header";
 import GameBoard from "./components/game/GameBoard";
-import GameState, { GameError } from "./models/GameModel";
+import GameState, { MoveError } from "./models/GameModel";
 import GamePieceModel, {
   GamePieceColor,
   GamePieceType,
@@ -301,30 +301,30 @@ function App() {
           piece.resetPositionFunc();
           let content = "Wrong move! ";
           switch (decodedMessage.error) {
-            case GameError.CANT_MOVE_PIECE:
+            case MoveError.CANT_MOVE_PIECE:
               content += "The piece cannot move to the chosen field";
               break;
-            case GameError.FIELD_TAKEN:
+            case MoveError.FIELD_TAKEN:
               content += "The chosen field is taken";
               break;
-            case GameError.ILLEGAL_MOVE:
+            case MoveError.ILLEGAL_MOVE:
               content += "This move is illegal";
               break;
-            case GameError.MUST_CAPTURE:
+            case MoveError.MUST_CAPTURE:
               content +=
                 "You have a possibility to capture so you have to do it";
               break;
-            case GameError.NOT_KING:
+            case MoveError.NOT_KING:
               content +=
                 "The chosen piece is not a king so it cannot move backwards";
               break;
-            case GameError.NOT_YOUR_PIECE:
+            case MoveError.NOT_YOUR_PIECE:
               content += "The chosen piece doesn't belong to you";
               break;
-            case GameError.NOT_YOUR_TURN:
+            case MoveError.NOT_YOUR_TURN:
               content += "It's not your turn";
               break;
-            case GameError.MUST_USE_SAME_PIECE:
+            case MoveError.MUST_USE_SAME_PIECE:
               content += "You have to use the same piece as last time";
               break;
             default:

@@ -7,7 +7,7 @@ const GameState = {
   TIE: 6,
 };
 
-const GameError = {
+const MoveError = {
   NO_ERROR: 1,
   CANT_MOVE_PIECE: 2,
   ILLEGAL_MOVE: 3,
@@ -19,4 +19,4 @@ const GameError = {
   MUST_USE_SAME_PIECE: 9,
 };
 
-export { GameState as default, GameError };
+export { GameState as default, MoveError };
